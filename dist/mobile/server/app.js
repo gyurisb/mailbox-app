@@ -16,7 +16,7 @@ var app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 //app.use(express.static('www'));
-app.use('/', express.static('C:/Users/Bence/Documents/Diplomamunka/Mailbox/dist/mobile/cordova/www'));
+app.use('/', express.static('C:/Users/Bence/Documents/Diplomamunka/mailbox-app/dist/mobile/cordova/www'));
 
 // IMPORTANT: Your application HAS to respond to GET /health with status 200
 app.get('/health', function(req, res) {

@@ -39,9 +39,9 @@ app.factory('$master', ['$rootScope', '$location', '$window',
                 pageView = $('*[page-view]');
                 if (pageView.size() > 0) {
                     $('body').append('<div hidden id="page-container"/>');
-                    pages = $('#master-layout *[page]');
+                    pages = $('*[master-layout] *[page]');
                     pages.appendTo('#page-container');
-                    $('#master-layout').remove();
+                    $('*[master-layout]').remove();
                     container = $('#page-container');
                 }
             }
