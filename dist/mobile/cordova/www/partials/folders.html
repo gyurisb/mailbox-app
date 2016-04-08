@@ -1,0 +1,7 @@
+<md-list>
+    <md-list-item ng-repeat="folder in folders" ng-class="{'md-selected': folder==selectedFolder}" ng-click="folderClicked(folder)">
+        <div class="md-list-item-text" layout="column">
+                <p>{{folder.name}}</p>
+        </div>
+    </md-list-item>
+</md-list>

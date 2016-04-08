@@ -1,0 +1,20 @@
+{
+  "name": "openshift-cartridge-nodejs-template",
+  "version": "1.0.1",
+  "description": "Custom Node.js cartridge for OpenShift - sample application",
+  "private": true,
+  "main": "start.js",
+  "scripts": {
+    "start": "node --use_strict start.js"
+  },
+  "author": "Ionut-Cristian Florescu <ionut.florescu@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+	"express": "4.13.4",
+    "body-parser": "1.15.0",
+    "browserbox": "0.9.1",
+    "wo-smtpclient": "0.6.1",
+    "mailbuild": "0.3.7",
+    "mimeparser": "0.3.8"
+  }
+}

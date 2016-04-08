@@ -1,0 +1,40 @@
+<md-toolbar layout="row">
+    <div class="md-toolbar-tools">
+        <div id="top-menu-area" ng-show="loggedIn">
+            <span style="cursor: pointer;" ng-click="newEmail()">New message</span>
+        </div>
+        <span flex=""></span>
+        <div ng-controller="LoginController" id='login-area' ng-hide="loggedIn" page>
+            <input type="text" width="100" placeholder="username" ng-model="formUserName">
+            <input type="password" width="100" placeholder="password" ng-model="formPassword">
+            <button id="loginbtn" ng-click="login()" ng-disabled="loginInProgress">Login</button>
+        </div>
+        <div id='user-area' ng-show="loggedIn">
+            <span>Welcome {{userName}}
+        </div>
+    </div>
+</md-toolbar>
+<div flex layout="row" class="main-row">
+    <md-sidenav ng-click="ul.toggleList()" md-is-locked-open="$mdMedia('gt-sm')" md-component-id="left" class="folders-nav md-whiteframe-z2" >
+        <md-list ng-controller="FoldersController" page>
+            <md-list-item ng-repeat="folder in folders" ng-class="{'md-selected': folder==selectedFolder}" ng-click="folderClicked(folder)">
+                <div class="md-list-item-text" layout="column">
+                    <p>{{folder.name}}</p>
+                </div>
+            </md-list-item>
+        </md-list>
+    </md-sidenav>
+    <md-sidenav ng-click="ul.toggleList()" md-is-locked-open="$mdMedia('gt-sm')" md-component-id="left" class="md-whiteframe-z2" >
+        <md-list ng-controller="EmailsController" page>
+            <md-list-item class="md-3-line" ng-repeat="email in emails" ng-class="{'md-selected': email.uid==selectedEmail}" ng-click="emailClicked(email)">
+                <div class="md-list-item-text" layout="column">
+                    <p class="email-from"><i>{{email.envelope.from[0].name}}</i></p>
+                    <h3 class="email-subject">{{email.envelope.subject}}</h3>
+                    <p class="email-date">{{email.envelope.date}}</p>
+                </div>
+            </md-list-item>
+        </md-list>
+    </md-sidenav>
+    <md-content ng-controller="ReaderController" flex class="email-area" page>
+    </md-content>
+</div>
