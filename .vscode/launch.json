@@ -21,7 +21,7 @@
 			"target": "emulator",
 			"port": 9222,
 			"sourceMaps": true,
-			"cwd": "${workspaceRoot}"
+			"cwd": "${workspaceRoot}/dist/mobile/cordova"
 		},
 	]
 }

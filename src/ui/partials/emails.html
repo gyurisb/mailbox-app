@@ -1,9 +1,0 @@
-<md-list>
-    <md-list-item class="md-3-line" ng-repeat="email in emails" ng-class="{'md-selected': email.uid==selectedEmail}" ng-click="emailClicked(email)">
-        <div class="md-list-item-text" layout="column">
-            <p class="email-from"><i>{{email.envelope.from[0].name}}</i></p>
-            <h3 class="email-subject">{{email.envelope.subject}}</h3>
-            <p class="email-date">{{email.envelope.date}}</p>
-        </div>
-    </md-list-item>
-</md-list>

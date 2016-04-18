@@ -1,0 +1,15 @@
+html {
+    height: 100%;
+}
+body {
+    height: calc(100% - 16px);
+    margin: 0px;
+    padding: 8px;
+}
+body, td, th {
+    font-size: 12pt;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+p {
+    margin: 0px;
+}

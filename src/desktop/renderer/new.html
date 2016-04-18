@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>New e-mail</title>
+    <script>
+        require('angular');
+        require('angular-aria');
+        require('angular-animate');
+        require('angular-material');
+        const ipcRenderer = require('electron').ipcRenderer;
+    </script>
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/tinymce/tinymce.min.js"></script>
+    <script src="js/index.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/master.service.js"></script>
+    <script src="js/app.service.js"></script>
+    <script src="js/email.service.js"></script>
+    <script src="controllers/new.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/angular-material.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <script>
+        tinymce.init({
+            selector: 'textarea.rich-textarea',
+            height: 400,
+            plugins: [
+                'advlist autolink lists link image charmap print preview anchor',
+                'searchreplace visualblocks code fullscreen',
+                'insertdatetime media table contextmenu paste code'
+            ],
+            menubar: false,
+            statusbar: false,
+            toolbar: 'insertfile undo redo | styleselect | fontselect fontsizeselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+            content_css: 'css/style-email.css'
+        });
+    </script>
+  </head>
+  <body ng-app="emailApp" class="newEmail" ng-controller="NewController">
+    <md-content style="height: 100%">
+        <table style="padding: 0px 5px">
+            <tr>
+                <td>
+                    <md-chips ng-model="to" placeholder="To" secondary-placeholder="+Cc"></md-chips>
+                    <md-chips ng-model="toBcc" placeholder="Bcc" secondary-placeholder="+Bcc" ng-if="showBcc"></md-chips>
+                    <md-input-container class="md-block envelope-input subject-input" flex-gt-sm>
+                        <label>Subject</label>
+                        <input type="text" ng-model="subject">
+                    </md-input-container>
+                </td>
+            </tr>
+            <tr>
+                <td style="height: 100%">
+                    <textarea class="rich-textarea"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <md-button ng-click="send()" ng-disabled="isSending">Send</md-button>
+                    <md-button class="md-icon-button" aria-label="Use Android">
+                        <md-icon>&#xf0c7;</md-icon>
+                    </md-button>
+                    <md-button class="md-icon-button" aria-label="Use Android">
+                        <md-icon>&#xf1f8;</md-icon>
+                    </md-button>
+                    <md-button class="md-icon-button md-primary" aria-label="Use Android" style="float: right;">
+                        <md-icon>&#xf0c6;</md-icon>
+                    </md-button>
+                </td>
+            </tr>
+        </table>
+    </md-content>
+    <!--<table class="container" page>
+        <tr>
+            <td class="label-cell">
+                <label>To:</label>
+            </td>
+            <td class="input-cell">
+                <input type="text" id="to-field" ng-model="to"></input>
+            </td>
+        </tr>
+        <tr>
+            <td class="label-cell">
+                <label>Subject:</label>
+            </td>
+            <td class="input-cell">
+                <input type="text" id="subject-field" ng-model="subject"></input>
+            </td>
+        </tr>
+        <tr>
+            <td class="main" colspan="2">
+                <textarea id="body-text" ng-model="text"></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td class="bottom" colspan="2">
+                <input type="button" id="send-btn" value="Send" ng-click="send()" ng-disabled="isSending"></input>
+            </td>
+        </tr>
+    </table>-->
+  </body>
+</html>

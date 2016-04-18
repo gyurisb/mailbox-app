@@ -1,0 +1,126 @@
+html, body {
+    height: 100%;
+    max-height: 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+
+/* Folder list element style */
+
+.md-list-folder p {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.md-list-folder .md-list-item-text {
+    width: 100%;
+}
+.md-list-folder .md-button {
+    margin-left: -30px;
+    padding: 0px 16px 0 46px;
+}
+.folder-hide-btn {
+    border: 1px solid #A0A0A0;
+    color: #A0A0A0;
+    border-radius: 3px;
+    background: transparent;
+}
+.folder-group {
+    padding-left: 10px;
+}
+.animate-folder-group {
+    -webkit-transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
+    -webkit-transition-property: height;
+    -moz-transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
+    -moz-transition-property: height;
+    transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
+    transition-property: height;
+    overflow: hidden;
+}
+/*.animate-folder-group.ng-enter, .animate-folder-group.ng-leave.ng-leave-active {
+  max-height: 0px;
+}
+.animate-folder-group.ng-enter.ng-enter-active, .animate-folder-group.ng-leave {
+  max-height: 1000px;
+}*/
+
+/* Email list element style */
+
+.email-from {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: calc(100% - 65px);
+}
+.email-date {
+    float: right;
+}
+
+/* New email page (new.html) */
+
+.envelope-input.subject-input {    
+    margin-bottom: -10px;
+}
+
+.mce-tinymce:not(.mce-floatpanel), .mce-edit-area.mce-container, .mce-container-body.mce-stack-layout {
+    height: 100% !important;
+    border-width: 0px !important;
+}
+.mce-edit-area.mce-container {
+    height: calc(100% - 36px) !important;
+    overflow-y: auto;
+    border-width: 0px !important;
+}
+.mce-tinymce iframe {
+    cursor: text;
+    height: 100% !important;
+}
+.mce-toolbar-grp, .mce-toolbar-grp .mce-btn {
+    background-color: white !important;
+}
+.mce-toolbar-grp {
+    padding-bottom: 15px;
+}
+
+/*New email old */
+.newEmail table {
+    padding: 0px;
+    margin: 0px;
+    height: 100%;
+    width: 100%;
+}
+.newEmail tr {
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+/*.label-cell {
+    width: 80px;
+    padding: 5px;
+}
+.input-cell {
+    width: 100%;
+    padding-right: 3px;
+}
+.newEmail input[type='text'] {
+    width: 100%;
+    margin: 0px;
+}
+.main {
+    height: 100%;
+    width: 100%;
+    padding: 5px;
+}
+.newEmail textarea {
+    height: 100%;
+    width: 100%;
+}
+.bottom {
+    padding: 5px;
+}
+.newEmail input[type='button'] {
+    height: 30px;
+    width: 200px;
+}*/

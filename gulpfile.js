@@ -2,13 +2,27 @@ var gulp = require('gulp');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
+var del = require('del');
+//gulp-clean |gulp-del
 
 gulp.task('build', function() {
     
-    gulp.src('src/email/*.js')
+    del(['dist/**/*',   
+        '!dist', '!dist/desktop', '!dist/desktop/node_modules/**',
+        '!dist/mobile', '!dist/mobile/cordova', '!dist/mobile/cordova/platforms/**',
+        '!dist/mobile/server', '!dist/mobile/server/node_modules/**',
+        '!dist/.gitignore'
+        ]);
+    
+    gulp.src('src/desktop/**')
+        .pipe(gulp.dest('dist/desktop'));
+    gulp.src('src/mobile/**')
+        .pipe(gulp.dest('dist/mobile'));
+    
+    gulp.src('src/shared/email/*.js')
         .pipe(gulp.dest('dist/desktop/main'))
         .pipe(gulp.dest('dist/mobile/server'));
-    gulp.src('src/ui/**/*')
+    gulp.src('src/shared/ui/**/*')
         .pipe(gulp.dest('dist/desktop/renderer'))
         .pipe(gulp.dest('dist/mobile/cordova/www'));
         
