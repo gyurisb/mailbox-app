@@ -1,4 +1,4 @@
-var app = angular.module('emailApp', ['ngAnimate', 'ngMaterial']);
+var app = angular.module('emailApp', ['ngAnimate', 'ngMaterial', 'ui.tinymce']);
 var loggedIn = false;
 
 var mainScope;

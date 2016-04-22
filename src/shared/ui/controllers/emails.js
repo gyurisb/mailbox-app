@@ -1,18 +1,18 @@
-app.controller('EmailsController', ['$scope', '$email', '$app', '$master', '$filter', function($scope, $email, $app, $master, $filter) {
+app.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '$filter', function($scope, $mailbox, $app, $master, $filter) {
     
     $scope.emails = [];
     $scope.selectedEmail = null;
     
     $app.secondaryOnLogin(function(){
         if (platform == 'desktop') {
-            $email.getEmails().success(function(emails){
+            $mailbox.getEmails().success(function(emails){
                 $scope.emails = emails;
             });
         }
     });
     
     $app.onFolderFocus(function(path) {
-        $email.getEmails(path).success(function(emails){
+        $mailbox.getEmails(path).success(function(emails){
             $scope.emails = emails;
             $master.focus(2);
         });

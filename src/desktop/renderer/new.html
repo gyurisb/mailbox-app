@@ -12,37 +12,34 @@
     </script>
     <script src="lib/jquery.min.js"></script>
     <script src="lib/tinymce/tinymce.min.js"></script>
+    <script src="lib/angular/angular-ui-tinymce.min.js"></script>
     <script src="js/index.js"></script>
     <script src="js/app.js"></script>
     <script src="js/master.service.js"></script>
     <script src="js/app.service.js"></script>
-    <script src="js/email.service.js"></script>
+    <script src="js/mailbox.service.js"></script>
     <script src="controllers/new.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/angular-material.css">
     <link rel="stylesheet" href="css/font-awesome.min.css">
-    <script>
-        tinymce.init({
-            selector: 'textarea.rich-textarea',
-            height: 400,
-            plugins: [
-                'advlist autolink lists link image charmap print preview anchor',
-                'searchreplace visualblocks code fullscreen',
-                'insertdatetime media table contextmenu paste code'
-            ],
-            menubar: false,
-            statusbar: false,
-            toolbar: 'insertfile undo redo | styleselect | fontselect fontsizeselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
-            content_css: 'css/style-email.css'
-        });
-    </script>
   </head>
   <body ng-app="emailApp" class="newEmail" ng-controller="NewController">
     <md-content style="height: 100%">
         <table style="padding: 0px 5px">
             <tr>
                 <td>
-                    <md-chips ng-model="to" placeholder="To" secondary-placeholder="+Cc"></md-chips>
+                    <md-contact-chips
+                        ng-model="to" 
+                        placeholder="To" 
+                        secondary-placeholder="+Cc" 
+                        md-contacts="querySearch($query)"
+                        md-contact-name="name"
+                        md-contact-email="email"
+                        md-require-match="true"
+                        md-highlight-flags="i"
+                        filter-selected="true"
+                        md-require-match="true">
+                    </md-contact-chips>
                     <md-chips ng-model="toBcc" placeholder="Bcc" secondary-placeholder="+Bcc" ng-if="showBcc"></md-chips>
                     <md-input-container class="md-block envelope-input subject-input" flex-gt-sm>
                         <label>Subject</label>
@@ -52,19 +49,22 @@
             </tr>
             <tr>
                 <td style="height: 100%">
-                    <textarea class="rich-textarea"></textarea>
+                    <textarea ui-tinymce="tinymceOptions" ng-model="text" hidden></textarea>
                 </td>
             </tr>
             <tr>
                 <td>
                     <md-button ng-click="send()" ng-disabled="isSending">Send</md-button>
-                    <md-button class="md-icon-button" aria-label="Use Android">
+                    <md-button class="md-icon-button" aria-label="Save as draft">
+                        <md-tooltip md-direction="top">Save as draft</md-tooltip>
                         <md-icon>&#xf0c7;</md-icon>
                     </md-button>
-                    <md-button class="md-icon-button" aria-label="Use Android">
+                    <md-button class="md-icon-button" aria-label="Delete e-mail">
+                        <md-tooltip md-direction="top">Delete e-mail</md-tooltip>
                         <md-icon>&#xf1f8;</md-icon>
                     </md-button>
-                    <md-button class="md-icon-button md-primary" aria-label="Use Android" style="float: right;">
+                    <md-button class="md-icon-button md-primary" aria-label="Attach a file" style="float: right;">
+                        <md-tooltip md-direction="left">Attach a file</md-tooltip>
                         <md-icon>&#xf0c6;</md-icon>
                     </md-button>
                 </td>

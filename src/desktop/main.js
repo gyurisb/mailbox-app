@@ -1,7 +1,6 @@
 'use strict';
 
-const Hello = require('./main/hello.js');
-const EmailConnection = require('./main/email.js');
+require('./main/mailbox_server.js')
 const electron = require('electron');
 // Module to control application life.
 const app = electron.app;
@@ -82,49 +81,6 @@ app.on('activate', function () {
   if (mainWindow === null) {
     createWindow();
   }
-});
-
-var conn;
-
-ipcMain.on('loginAsync', function(event, arg) {
-    conn = new EmailConnection();
-    conn.login(arg, function() {
-        event.sender.send('loginReply', true);
-    }, function(err){
-        event.sender.send('loginError', err);
-    });
-});
-
-ipcMain.on('getFoldersAsync', function(event, arg){
-    conn.getFolders(function(mailboxes) {
-        event.sender.send('getFoldersReply', mailboxes);
-    }, function(err){
-        event.sender.send('getFoldersError', err);
-    });
-});
-
-ipcMain.on('getEmailsAsync', function(event, path){
-    conn.getEmails(path, function(messages) {
-        event.sender.send('getEmailsReply', messages);
-    }, function(err){
-        event.sender.send('getEmailsError', err);
-    });
-});
-
-ipcMain.on('getEmailBodyAsync', function(event, arg) {
-    conn.getEmailBody(arg.uid, function(body) {
-        event.sender.send('getEmailBodyReply', body);
-    }, function(err){
-        event.sender.send('getEmailBodyError', err);
-    });
-});
-
-ipcMain.on('sendEmailAsync', function(event, arg) {
-    conn.sendEmail(arg, function() {
-        event.sender.send('sendEmailReply', true);
-    }, function(err){
-        event.sender.send('sendEmailError', err);
-    });
 });
 
 ipcMain.on('openNewEmailWindow', function(event, arg) {

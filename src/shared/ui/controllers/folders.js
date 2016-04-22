@@ -1,9 +1,9 @@
-app.controller('FoldersController', ['$scope', '$email', '$app', '$master', function($scope, $email, $app, $master) {
+app.controller('FoldersController', ['$scope', '$mailbox', '$app', '$master', function($scope, $mailbox, $app, $master) {
 
     $scope.folders = [];
     $scope.selectedFolder = null;
     $app.onLogin(function(){
-        $email.getFolders().success(function(root) {
+        $mailbox.getFolders().success(function(root) {
             orderTopMailboxes(root);
             $scope.root = root;
             $scope.selectedFolder = root.children[0];

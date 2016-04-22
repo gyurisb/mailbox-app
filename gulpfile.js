@@ -7,12 +7,12 @@ var del = require('del');
 
 gulp.task('build', function() {
     
-    del(['dist/**/*',   
-        '!dist', '!dist/desktop', '!dist/desktop/node_modules/**',
-        '!dist/mobile', '!dist/mobile/cordova', '!dist/mobile/cordova/platforms/**',
-        '!dist/mobile/server', '!dist/mobile/server/node_modules/**',
-        '!dist/.gitignore'
-        ]);
+    // del(['dist/**/*',   
+    //     '!dist', '!dist/desktop', '!dist/desktop/node_modules/**',
+    //     '!dist/mobile', '!dist/mobile/cordova', '!dist/mobile/cordova/platforms/**',
+    //     '!dist/mobile/server', '!dist/mobile/server/node_modules/**',
+    //     '!dist/.gitignore'
+    //     ]);
     
     gulp.src('src/desktop/**')
         .pipe(gulp.dest('dist/desktop'));
@@ -22,6 +22,8 @@ gulp.task('build', function() {
     gulp.src('src/shared/email/*.js')
         .pipe(gulp.dest('dist/desktop/main'))
         .pipe(gulp.dest('dist/mobile/server'));
+    gulp.src('src/shared/main/*.js')
+        .pipe(gulp.dest('dist/desktop/main'));
     gulp.src('src/shared/ui/**/*')
         .pipe(gulp.dest('dist/desktop/renderer'))
         .pipe(gulp.dest('dist/mobile/cordova/www'));

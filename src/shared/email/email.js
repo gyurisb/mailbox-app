@@ -2,9 +2,9 @@ const BrowserBox = require('browserbox');
 const SmtpClient = require('wo-smtpclient');
 const MimeParser = require('mimeparser');
 
-module.exports = newEmailConnection;
+module.exports = EmailConnection;
 
-function newEmailConnection() {
+function EmailConnection() {
 	var imap;
 	var sender;
 	var password;
@@ -117,7 +117,7 @@ function newEmailConnection() {
 				alreadySending = true;
 				client.useEnvelope({
 					from: sender,
-					to: [arg.to]
+					to: arg.to
 				});
 			};
 			client.onready = function(failedRecipients){
@@ -136,6 +136,9 @@ function newEmailConnection() {
 				error(err);
 			};
 			client.connect();
+		},
+		getAccount() {
+			return sender;
 		}
 	}
 }

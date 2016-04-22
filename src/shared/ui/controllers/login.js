@@ -1,6 +1,6 @@
-app.controller('LoginController', ['$scope', '$email', '$location', '$app', function($scope, $email, $location, $app) {
+app.controller('LoginController', ['$scope', '$location', '$app', '$mailbox', function($scope, $location, $app, $mailbox) {
     
-    $email.onError(function(error){
+    $mailbox.onError(function(error){
         $scope.error = error;
         $scope.loginInProgress = false;
         alert(JSON.stringify(error));
@@ -13,7 +13,7 @@ app.controller('LoginController', ['$scope', '$email', '$location', '$app', func
     $scope.login = function() {
         $scope.userName = $scope.formUserName;
         $scope.loginInProgress = true;
-        $email.login({
+        $mailbox.login({
             imapHost: "imap-mail.outlook.com",
             imapPort: 993,
             smtpHost: "smtp.live.com",

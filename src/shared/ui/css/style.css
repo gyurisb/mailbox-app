@@ -84,6 +84,12 @@ html, body {
     padding-bottom: 15px;
 }
 
+md-virtual-repeat-container {
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
+}
+
 /*New email old */
 .newEmail table {
     padding: 0px;

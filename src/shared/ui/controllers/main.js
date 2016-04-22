@@ -1,4 +1,4 @@
-app.controller('MainController', ['$scope', '$email', '$app', '$master', function($scope, $email, $app, $master) {
+app.controller('MainController', ['$scope', '$app', '$master', function($scope, $app, $master) {
     mainScope = $scope;
     
     $scope.loggedIn = false;
