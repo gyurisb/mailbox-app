@@ -1,7 +1,7 @@
-app.controller('ReaderController', ['$scope', '$mailbox', '$app', '$master', function($scope, $mailbox, $app, $master) {
+ngApp.controller('ReaderController', ['$scope', '$mailbox', '$app', '$master', function($scope, $mailbox, $app, $master) {
     
-    $app.onEmailFocus(function(uid) {
-        $mailbox.getEmailBody(uid).success(function(body){
+    $app.onEmailFocus(function(uid, path) {
+        $mailbox.getEmailBody(uid, path).success(function(body){
             var encodedText = body.text.replace(/"/g, '&quot;');
             if (body.type == "text/plain") {
                 encodedText = encodedText.replace(/\n/g, '<br/>');

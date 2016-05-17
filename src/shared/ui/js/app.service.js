@@ -1,4 +1,4 @@
-app.factory('$app', ['$master',
+ngApp.factory('$app', ['$master',
     function($master) {
         var folderFocusedCallback;
         var emailFocusedCallback;
@@ -18,15 +18,15 @@ app.factory('$app', ['$master',
             onEmailFocus: function(callback) {
                 emailFocusedCallback = callback;
             },
-            login: function() {
+            restore: function() {
                 loginCallback();
                 loginCallback2();
             },
             focusFolder: function(folder) {
                 folderFocusedCallback(folder.path);
             },
-            focusEmail: function(email) {
-                emailFocusedCallback(email.uid);
+            focusEmail: function(uid, path) {
+                emailFocusedCallback(uid, path);
             },
             newEmail: function() {
                 if (platform == 'desktop') {
@@ -34,7 +34,28 @@ app.factory('$app', ['$master',
                 } else if (platform == 'mobile') {
                     $master.focus(4);
                 }
-            }
+            },
+            sendEmail: function() {
+                if (platform == 'desktop') {
+                    remote.getCurrentWindow().close();
+                } else if (platform == 'mobile') {
+                    $master.focus(0);
+                }
+            },
+            requestLogin: function() {
+                if (platform == 'desktop') {
+                    ipcRenderer.send('openNewLoginDialog');
+                } else if (platform == 'mobile') {
+                    $master.focus(3);
+                }
+            },
+            login: function() {
+                if (platform == 'desktop') {
+                    remote.getCurrentWindow().close();
+                } else if (platform == 'mobile') {
+                    $master.focus(0);
+                }
+            },
         };
     }
 ]);

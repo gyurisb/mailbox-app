@@ -1,8 +1,8 @@
 var mailboxServiceCount = 0;
-app.factory('$mailbox', ['$timeout',
+ngApp.factory('$mailbox', ['$timeout',
     function($timeout) {
         mailboxServiceCount++;
-        var actions = ['login', 'getFolders', 'getEmails', 'getEmailBody', 'sendEmail', 'contacts'];
+        var actions = ['login', 'restore', 'getFolders', 'getEmails', 'getEmailBody', 'sendEmail', 'contacts', 'onFolderUpdate', 'onMailboxUpdate'];
         var replyHandlers = {};
         var errorHandlers = {};
         actions.forEach(function(action){
@@ -19,20 +19,29 @@ app.factory('$mailbox', ['$timeout',
             login: function(args) {
                 return ipc('login', args);
             },
+            restore: function() {
+                return ipc('restore');
+            },
             getFolders: function() {
                 return ipc('getFolders');
             },
-            getEmails: function(path) {
-                return ipc('getEmails', path);
+            getEmails: function(path, page) {
+                return ipc('getEmails', { path: path, page: page });
             },
-            getEmailBody: function(uid) {
-                return ipc('getEmailBody', { uid: uid });
+            getEmailBody: function(uid, path) {
+                return ipc('getEmailBody', { uid: uid, path: path });
             },
             sendEmail: function(args) {
                 return ipc('sendEmail', args);
             },
             contacts: function(key) {
                 return ipc('contacts', key);
+            },
+            onFolderUpdate: function() {
+                return ipc('onFolderUpdate');
+            },
+            onMailboxUpdate: function() {
+                return ipc('onMailboxUpdate');
             },
             onError: function(handler) {
                 errorHandler = handler;

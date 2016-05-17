@@ -23,7 +23,8 @@ gulp.task('build', function() {
         .pipe(gulp.dest('dist/desktop/main'))
         .pipe(gulp.dest('dist/mobile/server'));
     gulp.src('src/shared/main/*.js')
-        .pipe(gulp.dest('dist/desktop/main'));
+        .pipe(gulp.dest('dist/desktop/main'))
+        .pipe(gulp.dest('dist/mobile/cordova/www/js'));
     gulp.src('src/shared/ui/**/*')
         .pipe(gulp.dest('dist/desktop/renderer'))
         .pipe(gulp.dest('dist/mobile/cordova/www'));

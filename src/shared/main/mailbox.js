@@ -1,68 +1,164 @@
-const sqlite3 = require('sqlite3');
-const EmailConnection = require('./email.js');
-
-function Mailbox() {
-    var db = new sqlite3.Database('mailbox.db');
-    // createDatabase();
-    var conn = new EmailConnection();
+function Mailbox(db, EmailConnection, EmailStore) {
+    var mainStore = new EmailStore(db);
+    var store;
+    var connections = [];
+    var conn;
+    var folderUpdateCallback = function(){};
+    var mailboxUpdateCallback = function(){};
+    
     return {
-        login: function(args, success, error) {
-            conn.login(args, success, error);
-        },
-        getFolders: function(success, error) {
-            conn.getFolders(function(root) {
-                success(root);
-                // saveAllFolder(root);
+        login: function(credentials, success, error) {
+            login(credentials, function() {
+                //TODO értesíteni a főablakot hogy bejelentkezés történt
+                success();
+                mainStore.saveAccount(credentials);
+                fetch();
             }, error);
         },
-        getEmails: function(path, success, error) {
-            path = path || "Inbox";
-            db.all("SELECT * FROM emails WHERE path = ? AND account = ? ORDER BY date DESC LIMIT 9", [path, conn.getAccount()], function(err, cachedEmails) {
-                success(cachedEmails.map(deserializeEmail));
-            
-                conn.getEmails(path, function(emails) {
-                    if (cachedEmails.length!=emails.length || !emails.every(function(v,i) { return v.uid === cachedEmails[i].uid})) {
-                        success(emails);
-                        saveAllEmail(emails, path);
+        restore: function(success, error) {
+            mainStore.open(function(){
+                mainStore.createDatabase();
+                mainStore.getAccounts(function(accounts) {
+                    accounts = accounts || [];
+                    accounts.forEach(function(account){
+                        store = new mainStore.Account(account.username);
+                        login(account, function(){
+                            fetch();
+                        }, error);
+                    });
+                    if (accounts.length == 0) {
+                        success();
+                    } else {
+                        success(accounts[0].username);
                     }
-                }, error);
+                });
             });
         },
-        getEmailBody: function(uid, success, error) {
-            conn.getEmailBody(uid, success, error);
+        fetch: function() {
+            fetch();
+        },
+        getFolders: function(success, error) {
+            store.getFolders(function(cachedFolders) {
+                success(deserializeFolders(cachedFolders));
+            });
+        },
+        getEmails: function(args, success, error) {
+            args = args || {};
+            args.path = args.path || 'Inbox';
+            args.page = args.page || 0;
+            store.getEmails(args.path, args.page*9, 9, function(cachedEmails) {
+                success(cachedEmails.map(deserializeEmail));
+                if (cachedEmails.length < 9) {
+                    fetchAll({ path: args.path, progress: -1 }, args.page*9, 50, function(){});
+                }
+            });
+        },
+        getEmailBody: function(args, success, error) {
+            if (conn !== undefined) {
+                conn.getEmailBody(args.uid, args.path, success, error);
+            }
         },
         sendEmail: function(args, success, error) {
             conn.sendEmail(args, success, error);
         },
         contacts: function(key, selector) {
-            key = '%' + key + '%';
-            db.all("SELECT * FROM contacts WHERE name LIKE ? OR email LIKE ?", [key, key], function(err, contacts){
-                selector(contacts);
-            });
+            mainStore.getContacts(key, selector);
         },
+        onFolderUpdate: function(callback) {
+            folderUpdateCallback = callback;
+        },
+        onMailboxUpdate: function(callback) {
+            mailboxUpdateCallback = callback;
+        }
     };
     
-    function saveAllFolder(folder) {
+    function fetch() {
+        conn.getFolders(function(root) {
+            var folders = flattenFolders(root);
+            store.saveFolders(folders, function(changed) {
+                if (changed) {
+                    mailboxUpdateCallback();
+                }
+                //TODO: fölösleges újratöltés művelet, ha nincs módosítás
+                store.getFolders(function(savedFolders){
+                    fetchFolders(savedFolders);
+                });
+            });
+        }, function(){});
+    }
+    
+    function fetchFolders(folders, i) {
+        i = i || 0;
+        if (i >= folders.length)
+            return;
+        var folder = folders[i];
+        folder.progress = (i + 1)*100 / folders.length;
+        store.getLastUid(folder.path, function(lastUid){
+            if (lastUid === undefined || lastUid === null) {
+                fetchAll(folder, 0, 100, function(){
+                    fetchFolders(folders, i + 1);
+                });
+            } else {
+                fetchNew(folder, lastUid, function(){
+                    fetchFolders(folders, i + 1);
+                });
+            }
+        });
+    }
+    
+    function fetchAll(folder, offset, count, success) {
+        conn.getEmails(folder.path, offset, count, function(emails){
+            success();
+            store.saveEmails(emails, folder.path, function(savedEmailsCount){
+                folderUpdateCallback({folder: folder, changed: savedEmailsCount > 0 });
+            });
+        });
+    }
+    
+    function fetchNew(folder, lastUid, success) {
+        conn.getEmailsAfterUid(folder.path, lastUid, function(emails) {
+            success();
+            store.saveEmails(emails, folder.path, function(){
+                folderUpdateCallback({folder: folder, changed: emails.length > 0 });
+            });
+        }, function(){});
+    }
+    
+    function login(credentials, success, error) {
+        var newConn = new EmailConnection();
+        newConn.login(credentials, function() {
+            store = new mainStore.Account(credentials.username);
+            conn = newConn;
+            connections.push(newConn);
+            success();
+        }, error);
+    }
+    
+    function flattenFolders(folder) {
+        var res = [];
         if (folder.path !== undefined) {
-            db.run("INSERT INTO folders (path, account) VALUES (?, ?)", [folder.path, db.getAccount()], function(err, res) {});
+            res.push([store.account + '/' + folder.path, folder.path, store.account, folder.name]);
         }
         if (folder.children !== undefined) {
             folder.children.forEach(function(child){
-               saveAllFolder(child); 
+               flattenFolders(child).forEach(function(v){
+                   res.push(v);
+               });
             });
         }
+        return res;
     }
     
-    function saveAllEmail(emails, path) {
-        var reverseEmails = [].concat(emails);
-        reverseEmails.reverse();
-        reverseEmails.forEach(function(email){
-            db.run("INSERT INTO contacts (name, email) VALUES (?, ?)", [email.envelope.from[0].name, email.envelope.from[0].address], function(err, res) {});
-            db.run("INSERT INTO emails (uid, account, path, subject, senderName, senderEmail, date) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-                [email.uid, conn.getAccount(), path, email.envelope.subject, email.envelope.from[0].name, email.envelope.from[0].address, new Date(email.envelope.date).toISOString()], 
-                function(err, res) {}
-            );
+    function deserializeFolders(folders, root, depth) {
+        root = root || { children: [], path: "" };
+        depth = depth || 0;
+        var children = folders.filter(function(f) { return f.path.indexOf(root.path) == 0 && (f.path.match(/\//g)||[]).length == depth; });
+        children.forEach(function(child){
+            var folder = { children: [], path: child.path, name: child.name };
+            root.children.push(folder);
+            deserializeFolders(folders, folder, depth + 1);
         });
+        return root;
     }
     
     function deserializeEmail(email) {
@@ -78,21 +174,6 @@ function Mailbox() {
             }
         };
     }
-    
-    function createDatabase() {
-        db.run("CREATE TABLE contacts (name TEXT, email TEXT NOT NULL UNIQUE)");
-        db.run("CREATE TABLE folders (path TEXT NUT NULL, account TEXT NOT NULL)");
-        db.run("CREATE TABLE emails (uid NUM NOT NULL PRIMARY KEY, account TEXT NOT NULL, path TEXT NOT NULL, subject TEXT, senderName TEXT, senderEmail TEXT, date TEXT)");
-    }
 }
 
 module.exports = Mailbox;
-
-
-
-// <p>
-//     <i class="email-from">{{email.envelope.from[0].name || email.envelope.from[0].address}}</i>
-//     <span class="email-date">{{formatEmailDate(email.envelope.date)}}</span>
-// </p>
-// <h3 class="email-subject">{{email.envelope.subject}}</h3>
-//email.uid

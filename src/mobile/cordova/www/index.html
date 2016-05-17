@@ -36,8 +36,9 @@
         <link rel="stylesheet" type="text/css" href="css/style.css">
         <link rel="stylesheet" type="text/css" href="css/style-mobile.css">
         <link rel="stylesheet" type="text/css" href="css/angular-material.min.css">
+        <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
         
-        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="lib/winstore-jscompat.js"></script>
         <script type="text/javascript" src="lib/jquery.min.js"></script>
         <script type="text/javascript" src="lib/jquery-ui.min.js"></script>
         <script type="text/javascript" src="lib/angular/angular.min.js"></script>
@@ -50,8 +51,11 @@
         <!--<script type="text/javascript" src="lib/angular/angular-ui-sortable.min.js"></script>-->
         <script type="text/javascript" src="lib/nprogress.js"></script>
         
-        <script type="text/javascript" src="js/email_conn.proxy.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript" src="js/email_conn.proxy.js"></script>
+        <script type="text/javascript" src="js/mailbox.js"></script>
+        <script type="text/javascript" src="js/sqlite.subsys.js"></script>
+        <script type="text/javascript" src="js/email_store.js"></script>
         <script type="text/javascript" src="js/app.js"></script>
         <script type="text/javascript" src="js/master.service.js"></script>
         <script type="text/javascript" src="js/app.service.js"></script>
@@ -63,6 +67,8 @@
         <script type="text/javascript" src="controllers/emails.js"></script>
         <script type="text/javascript" src="controllers/reader.js"></script>
         <script type="text/javascript" src="controllers/new.js"></script>
+        
+        <script type="text/javascript" src="cordova.js"></script>
         <title>Mailbox</title>
     </head>
     <body ng-app="emailApp" ng-cloak ng-controller="MainController">
@@ -72,7 +78,7 @@
         </div>
         <div class="app">
             <button ng-if="loggedIn" id="new-btn" ng-click="newEmail()">New e-mail</button>
-            <div page-view style="height: calc(100% - 40px)"></div>
+            <div page-view class="toastBounds" style="height: calc(100% - 40px)"></div>
         </div>
     </body>
 </html>

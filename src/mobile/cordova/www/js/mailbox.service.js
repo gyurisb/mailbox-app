@@ -1,48 +1,77 @@
-app.factory('$mailbox', ['$timeout',
+ngApp.factory('$mailbox', ['$timeout',
     function($timeout) {
-        var conn = new EmailConnectionProxy();
+        var mailbox = new Mailbox(new SQLitePluginSubsystem('mailbox.db'), EmailConnectionProxy, EmailStore);
         return {
             login: function(args) {
-                return wrapToAngular(conn.login(args));
+                var p = angularPromise();
+                mailbox.login(args, p.performSuccess, p.performError);
+                return p.future;
+            },
+            restore: function() {
+                var p = angularPromise();
+                mailbox.restore(p.performSuccess, p.performError);
+                return p.future;
             },
             getFolders: function() {
-                return wrapToAngular(conn.getFolders());
+                var p = angularPromise();
+                mailbox.getFolders(p.performSuccess, p.performError);
+                return p.future;
             },
-            getEmails: function(path) {
-                return wrapToAngular(conn.getEmails(path));
+            getEmails: function(path, page) {
+                var p = angularPromise();
+                mailbox.getEmails({ path: path, page: page }, p.performSuccess, p.performError);
+                return p.future;
             },
-            getEmailBody: function(uid) {
-                return wrapToAngular(conn.getEmailBody(uid));
+            getEmailBody: function(uid, path) {
+                var p = angularPromise();
+                mailbox.getEmailBody({ uid: uid, path: path }, p.performSuccess, p.performError);
+                return p.future;
             },
             sendEmail: function(args) {
-                return wrapToAngular(conn.sendEmail(args));
+                var p = angularPromise();
+                mailbox.sendEmail(args, p.performSuccess, p.performError);
+                return p.future;
+            },
+            contacts: function(key) {
+                var p = angularPromise();
+                mailbox.contacts(key, p.performSuccess);
+                return p.future;
+            },
+            onFolderUpdate: function() {
+                var p = angularPromise();
+                mailbox.onFolderUpdate(p.performSuccess);
+                return p.future;
+            },
+            onMailboxUpdate: function() {
+                var p = angularPromise();
+                mailbox.onMailboxUpdate(p.performSuccess);
+                return p.future;
             },
             onError: function(callback) {}
         };
-        function wrapToAngular(request) {
-            // var successCallback;
-            // var future = {
-            //     success: function(callback){
-            //         successCallback = callback;
-            //     },
-            //     error: function(){}
-            // };
-            // request.success(function(responseData) {
-            //     $timeout(function() {
-            //         successCallback(responseData);
-            //     },0);
-            // });
-            // return future;
-            
-            var originalSuccess = request.success;
-            request.success = function(callback) {
-                originalSuccess(function(responseData) {
+        function angularPromise() {
+            var successCallback = angular.noop;
+            var errorCallback = angular.noop;
+            return {
+                future: {
+                    success: function(callback) {
+                        successCallback = callback;
+                    },
+                    error: function(callbac) {
+                        errorCallback = callback;
+                    }
+                },
+                performSuccess: function(res) {
                     $timeout(function() {
-                        callback(responseData);
+                        successCallback(res);
                     },0);
-                });
+                },
+                performError: function(err) {
+                    $timeout(function() {
+                        errorCallback(err);
+                    },0);
+                }
             };
-            return request;
         }
     }
 ]);

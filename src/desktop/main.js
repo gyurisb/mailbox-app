@@ -103,3 +103,15 @@ ipcMain.on('openNewEmailWindow', function(event, arg) {
   newWindow.loadURL('file://' + __dirname + '/renderer/new.html');
   newWindow.on('closed', function() {});
 });
+
+
+ipcMain.on('openNewLoginDialog', function(event, arg) {
+  var newWindow = new BrowserWindow({width: 400, height: 545});
+  newWindow.setMenuBarVisibility(false);
+  newWindow.setAutoHideMenuBar(true);
+  newWindow.loadURL('file://' + __dirname + '/renderer/login.html');
+  newWindow.on('closed', function() {});
+});
+
+ipcMain.on('closeWindow', function(event, arg) {
+});

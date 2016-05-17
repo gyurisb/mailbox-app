@@ -10,7 +10,8 @@ html, body, .main-row {
     overflow-x: hidden;
 }
 .email-area {
-  height: calc(100% - 64px);
+  /*height: calc(100% - 64px);*/
+  height: 100%;
   overflow: hidden;
 }
 iframe {
@@ -54,6 +55,10 @@ md-list-item.md-selected {
 }
 
 /* Email menu styles */
-md-list-item.md-2-line.md-list-email, md-list-item.md-2-line.md-list-email button {
+.md-list-email md-list-item.md-2-line, .md-list-email md-list-item.md-2-line button {
     min-height: 58px;
+}
+
+.md-list-email {
+    padding: 0px;
 }

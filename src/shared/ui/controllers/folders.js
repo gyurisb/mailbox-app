@@ -1,55 +1,45 @@
-app.controller('FoldersController', ['$scope', '$mailbox', '$app', '$master', function($scope, $mailbox, $app, $master) {
+ngApp.controller('FoldersController', ['$scope', '$mailbox', '$app', '$master', function($scope, $mailbox, $app, $master) {
 
-    $scope.folders = [];
     $scope.selectedFolder = null;
+    $scope.updatedFolders = {};
+    
+    function foldersLoaded(root) {
+        $scope.root = root;
+        if ($scope.selectedFolder == null)
+            $scope.selectedFolder = root.children[0].path;
+    }
+    
     $app.onLogin(function(){
-        $mailbox.getFolders().success(function(root) {
-            orderTopMailboxes(root);
-            $scope.root = root;
-            $scope.selectedFolder = root.children[0];
-            $master.focus(1);
-        });
+        $master.focus(1);
+        $mailbox.getFolders().success(foldersLoaded);
     });
     
+    $mailbox.onMailboxUpdate().success(function(){
+        $mailbox.getFolders().success(foldersLoaded);
+    });
+    
+    // $mailbox.onFolderUpdate().success(function(args){
+    //     $scope.updatedFolders[args.folder.path] = true;
+    // });
+    
     $scope.folderClicked = function(folder) {
-        $scope.selectedFolder = folder;
+        $scope.selectedFolder = folder.path;
         $app.focusFolder(folder);
     }
     
     $scope.times = function(size) {
         return new Array(size);
-    }
-    
-    function orderTopMailboxes(root) {
-        var unorderable = root.children.slice(0, 5);
-        var orderable = root.children.slice(5);
-        orderable.sort(function(folder1, folder2){
-            return folder1.name.localeCompare(folder2.name); 
-        });
-        root.children = unorderable.concat(orderable);
-        root.children.forEach(function(child){
-            orderMailboxes(child);
-        });
-    }
-    function orderMailboxes(folder) {
-        if (folder.children !== undefined) {
-            folder.children.sort(function(folder1, folder2){
-                return folder1.name.localeCompare(folder2.name); 
-            });
-            folder.children.forEach(function(child){
-                orderMailboxes(child);
-            });
-        }
-    }
+    }    
 }]);
 
-app.directive('mailboxFolder', function(){
+ngApp.directive('mailboxFolder', function(){
    return {
        restrict: 'E',
        scope: {
         folder: '=model',
         selectedFolder: '=selectedFolder',
-        folderClicked: '=folderClicked'
+        folderClicked: '=folderClicked',
+        updatedFolders: "=updatedFolders"
        },
        templateUrl: 'partials/folder.directive.html',
        link: function(scope, element) {

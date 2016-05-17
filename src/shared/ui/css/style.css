@@ -6,7 +6,47 @@ html, body {
     margin: 0px;
 }
 
+/* Toast style */
+.sync-toast md-progress-linear {
+    position: absolute;
+    width: calc(100% - 10px);
+    bottom: 5px;
+    /*right: 5px;*/
+    left: 5px;
+}
+
+/* New email button style */
+
+.new-email-btn {
+    width: 100% !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    text-align: left !important;
+    margin-top: 10px !important;
+}
+.new-email-btn md-icon {
+    float: right;
+    top: 13px;
+    right: 7px;
+    position: relative;
+}
+.new-email-btn span {
+    text-transform: initial;
+    padding-left: 15px;
+}
+
 /* Folder list element style */
+
+.account-label > span {
+    font-size: 14px;
+    padding: 10px 0px 10px 10px;
+    display: block;
+    cursor: pointer;
+}
+
+.small-text {
+    font-size: 14px;
+}
 
 .md-list-folder p {
     overflow: hidden;
@@ -88,6 +128,32 @@ md-virtual-repeat-container {
     width: 400px !important;
     min-width: 400px !important;
     max-width: 400px !important;
+}
+
+/* Login page */
+
+.login-content {
+    height: calc(100% - 20px);
+    padding: 10px;
+}
+
+.hint {
+    /* Position the hint */
+    position: absolute;
+    left: 2px;
+    right: auto;
+    bottom: 7px;
+    /* Copy styles from ng-messages */
+    font-size: 12px;
+    line-height: 14px;
+    transition: all 0.3s cubic-bezier(0.55, 0, 0.55, 0.2);
+    /* Set our own color */
+    color: grey; 
+}
+
+.login-btn {
+    margin-top: 40px !important;
+    float: right;
 }
 
 /*New email old */

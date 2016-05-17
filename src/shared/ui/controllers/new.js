@@ -1,4 +1,4 @@
-app.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$timeout', function($scope, $mailbox, $master, $q, $timeout) {
+ngApp.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$timeout', '$app', function($scope, $mailbox, $master, $q, $timeout, $app) {
     
     $scope.tinymceOptions = {
         onChange: function(e) {
@@ -41,7 +41,8 @@ app.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$timeou
             to: $scope.to.map(function(contact) { return contact.email; }), //contact => contact.email
             subject: $scope.subject,
             body: $scope.text
+        }).success(function(){
+            $app.sendEmail();
         });
-        //TODO: itt bezárni az ablakot/visszalépni
     }
 }]);

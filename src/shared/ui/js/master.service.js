@@ -1,6 +1,6 @@
 var masterIncludedDivCount = 2;
 
-app.factory('$master', ['$rootScope', '$location', '$window',
+ngApp.factory('$master', ['$rootScope', '$location', '$window',
     function($rootScope, $location, $window) {
         var pageView = undefined;
         var pages = undefined;

@@ -4,20 +4,23 @@ var backendHostName = "https://email-globaltransit.rhcloud.com";
 function EmailConnectionProxy() {
     var token;
     return {
-        login: function(args) {
-            return request('POST', 'login', args, true);
+        login: function(args, success, error) {
+            request('POST', 'login', args, true).success(success).error(error);
         },
-        getFolders: function() {
-            return request('GET', 'folders');
+        getFolders: function(success, error) {
+            request('GET', 'folders').success(success).error(error);
         },
-        getEmails: function(path) {
-            return request('GET', 'emails/' + path);
+        getEmails: function(path, offset, count, success, error) {
+            request('GET', 'emails/' + path + "?offset=" + offset + "&count=" + count).success(success).error(error);
         },
-        getEmailBody: function(uid) {
-            return request('GET', 'emailbody/' + uid);
+        getEmailsAfterUid: function(path, uid, success, error) {
+            request('GET', 'emails/' + path + "?afterUid=" + uid).success(success).error(error);
         },
-        sendEmail: function(args) {
-            return request('POST', 'send', args);
+        getEmailBody: function(uid, success, error) {
+            request('GET', 'emailbody/' + uid).success(success).error(error);
+        },
+        sendEmail: function(args, success, error) {
+            request('POST', 'send', args).success(success).error(error);
         },
         onError: function(callback) {}
     };

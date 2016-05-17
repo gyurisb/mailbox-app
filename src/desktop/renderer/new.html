@@ -9,6 +9,7 @@
         require('angular-animate');
         require('angular-material');
         const ipcRenderer = require('electron').ipcRenderer;
+        const remote = require('remote');
     </script>
     <script src="lib/jquery.min.js"></script>
     <script src="lib/tinymce/tinymce.min.js"></script>
@@ -71,33 +72,5 @@
             </tr>
         </table>
     </md-content>
-    <!--<table class="container" page>
-        <tr>
-            <td class="label-cell">
-                <label>To:</label>
-            </td>
-            <td class="input-cell">
-                <input type="text" id="to-field" ng-model="to"></input>
-            </td>
-        </tr>
-        <tr>
-            <td class="label-cell">
-                <label>Subject:</label>
-            </td>
-            <td class="input-cell">
-                <input type="text" id="subject-field" ng-model="subject"></input>
-            </td>
-        </tr>
-        <tr>
-            <td class="main" colspan="2">
-                <textarea id="body-text" ng-model="text"></textarea>
-            </td>
-        </tr>
-        <tr>
-            <td class="bottom" colspan="2">
-                <input type="button" id="send-btn" value="Send" ng-click="send()" ng-disabled="isSending"></input>
-            </td>
-        </tr>
-    </table>-->
   </body>
 </html>

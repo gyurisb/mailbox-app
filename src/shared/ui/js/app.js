@@ -1,9 +1,7 @@
-var app = angular.module('emailApp', ['ngAnimate', 'ngMaterial', 'ui.tinymce']);
+var ngApp = angular.module('emailApp', ['ngAnimate', 'ngMaterial', 'ui.tinymce']);
 var loggedIn = false;
 
-var mainScope;
-
-app.config(function($mdThemingProvider, $mdIconProvider) {
+ngApp.config(function($mdThemingProvider, $mdIconProvider) {
     // Configure a dark theme with primary foreground yellow
     $mdThemingProvider.theme('docs-dark', 'default')
         .primaryPalette('yellow')
@@ -14,13 +12,13 @@ app.config(function($mdThemingProvider, $mdIconProvider) {
 });
 
 
-app.directive('mailboxLayout', function(){
+ngApp.directive('mailboxLayout', function(){
    return {
        restrict: 'AE',
        templateUrl: 'partials/layout.html'
    }; 
 });
-app.directive('mailboxNew', function(){
+ngApp.directive('mailboxNew', function(){
    return {
        restrict: 'AE',
        templateUrl: 'partials/new.html'

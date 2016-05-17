@@ -1,30 +1,49 @@
-<div class="newEmail" page>
-    <table class="container" ng-controller="NewController">
-        <tr>
-            <td class="label-cell">
-                <label>To:</label>
-            </td>
-            <td class="input-cell">
-                <input type="text" id="to-field" ng-model="to"></input>
-            </td>
-        </tr>
-        <tr>
-            <td class="label-cell">
-                <label>Subject:</label>
-            </td>
-            <td class="input-cell">
-                <input type="text" id="subject-field" ng-model="subject"></input>
-            </td>
-        </tr>
-        <tr>
-            <td class="main" colspan="2">
-                <textarea id="body-text" ng-model="text"></textarea>
-            </td>
-        </tr>
-        <tr>
-            <td class="bottom" colspan="2">
-                <input type="button" id="send-btn" value="Send" ng-click="send()" ng-disabled="isSending"></input>
-            </td>
-        </tr>
-    </table>
+<div class="newEmail" ng-controller="NewController" page>
+    <md-content style="height: 100%">
+        <table style="padding: 0px 5px">
+            <tr>
+                <td>
+                    <md-contact-chips
+                        ng-model="to" 
+                        placeholder="To" 
+                        secondary-placeholder="+Cc" 
+                        md-contacts="querySearch($query)"
+                        md-contact-name="name"
+                        md-contact-email="email"
+                        md-require-match="true"
+                        md-highlight-flags="i"
+                        filter-selected="true"
+                        md-require-match="true">
+                    </md-contact-chips>
+                    <md-chips ng-model="toBcc" placeholder="Bcc" secondary-placeholder="+Bcc" ng-if="showBcc"></md-chips>
+                    <md-input-container class="md-block envelope-input subject-input" flex-gt-sm>
+                        <label>Subject</label>
+                        <input type="text" ng-model="subject">
+                    </md-input-container>
+                </td>
+            </tr>
+            <tr>
+                <td style="height: 100%">
+                    <textarea ui-tinymce="tinymceOptions" ng-model="text" hidden></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <md-button ng-click="send()" ng-disabled="isSending">Send</md-button>
+                    <md-button class="md-icon-button" aria-label="Save as draft">
+                        <md-tooltip md-direction="top">Save as draft</md-tooltip>
+                        <md-icon>&#xf0c7;</md-icon>
+                    </md-button>
+                    <md-button class="md-icon-button" aria-label="Delete e-mail">
+                        <md-tooltip md-direction="top">Delete e-mail</md-tooltip>
+                        <md-icon>&#xf1f8;</md-icon>
+                    </md-button>
+                    <md-button class="md-icon-button md-primary" aria-label="Attach a file" style="float: right;">
+                        <md-tooltip md-direction="left">Attach a file</md-tooltip>
+                        <md-icon>&#xf0c6;</md-icon>
+                    </md-button>
+                </td>
+            </tr>
+        </table>
+    </md-content>
 </div>

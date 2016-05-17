@@ -1,8 +1,9 @@
 
-<md-list-item ng-class="{'md-selected': folder==selectedFolder}" ng-click="folderClicked(folder)" class="md-list-folder">
+<md-list-item ng-class="{'md-selected': folder.path==selectedFolder}" ng-click="folderClicked(folder)" class="md-list-folder">
     <div class="md-list-item-text" layout="column">
         <p>
             {{folder.name}}
+            <i ng-show="updatedFolders[folder.path]" class="fa fa-check" aria-hidden="true" style="color: #72D472"></i>
             <span ng-if="hasChildren()" style="float: right">
                 <button ng-if="folder.closed === undefined" ng-click="close($event)" class="folder-hide-btn">-</button>
                 <button ng-if="folder.closed !== undefined" ng-click="open($event)" class="folder-hide-btn">+</button>
@@ -11,5 +12,6 @@
     </div>
 </md-list-item>
 <div ng-if="hasChildren()" ng-style="{ height: (folder.closed === undefined ? getHeight() : 0) + 'px' }" class="folder-group animate-folder-group">
-    <mailbox-folder ng-repeat="child in folder.children" model="child" selected-folder="selectedFolder" folder-clicked="folderClicked"></mailbox-folder>
+    <mailbox-folder ng-repeat="child in folder.children" model="child" selected-folder="selectedFolder" folder-clicked="folderClicked" updated-folders="updatedFolders">
+    </mailbox-folder>
 </div>

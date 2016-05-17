@@ -7,14 +7,17 @@
         "files": {}
     },
     "installed_plugins": {
+        "cordova-plugin-file": {
+            "PACKAGE_NAME": "Mailbox"
+        },
         "cordova-plugin-whitelist": {
-            "PACKAGE_NAME": "{2669ef30-fc53-11e5-83dc-05b42a7169ce}"
+            "PACKAGE_NAME": "Mailbox"
         },
         "cordova-plugin-dialogs": {
-            "PACKAGE_NAME": "{2669ef30-fc53-11e5-83dc-05b42a7169ce}"
+            "PACKAGE_NAME": "Mailbox"
         },
         "cordova-sqlite-legacy": {
-            "PACKAGE_NAME": "{2669ef30-fc53-11e5-83dc-05b42a7169ce}"
+            "PACKAGE_NAME": "Mailbox"
         }
     },
     "dependent_plugins": {}
