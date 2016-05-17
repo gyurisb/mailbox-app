@@ -5,14 +5,16 @@ var rename = require('gulp-rename');
 var del = require('del');
 //gulp-clean |gulp-del
 
+gulp.task('clean', function() {
+    del(['dist/**/*',   
+        '!dist', '!dist/desktop', '!dist/desktop/node_modules/**',
+        '!dist/mobile', '!dist/mobile/cordova', '!dist/mobile/cordova/platforms/**', '!dist/mobile/cordova/plugins/**',
+        '!dist/mobile/server', '!dist/mobile/server/node_modules/**',
+        '!dist/.gitignore'
+        ]);
+});
+
 gulp.task('build', function() {
-    
-    // del(['dist/**/*',   
-    //     '!dist', '!dist/desktop', '!dist/desktop/node_modules/**',
-    //     '!dist/mobile', '!dist/mobile/cordova', '!dist/mobile/cordova/platforms/**',
-    //     '!dist/mobile/server', '!dist/mobile/server/node_modules/**',
-    //     '!dist/.gitignore'
-    //     ]);
     
     gulp.src('src/desktop/**')
         .pipe(gulp.dest('dist/desktop'));
