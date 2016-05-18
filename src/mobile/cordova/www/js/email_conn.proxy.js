@@ -16,8 +16,8 @@ function EmailConnectionProxy() {
         getEmailsAfterUid: function(path, uid, success, error) {
             request('GET', 'emails/' + path + "?afterUid=" + uid).success(success).error(error);
         },
-        getEmailBody: function(uid, success, error) {
-            request('GET', 'emailbody/' + uid).success(success).error(error);
+        getEmailBody: function(uid, path, success, error) {
+            request('GET', 'emailbody/' + path + '/' + uid).success(success).error(error);
         },
         sendEmail: function(args, success, error) {
             request('POST', 'send', args).success(success).error(error);

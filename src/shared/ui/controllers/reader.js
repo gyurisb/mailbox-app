@@ -12,7 +12,7 @@ ngApp.controller('ReaderController', ['$scope', '$mailbox', '$app', '$master', f
             } else {
                 $('.email-area').html(body.text);
             }
-            $master.focus(3);
+            $master.focus(2);
         });
     });       
 }]);

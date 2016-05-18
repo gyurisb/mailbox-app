@@ -46,10 +46,10 @@ function Mailbox(db, EmailConnection, EmailStore) {
             args = args || {};
             args.path = args.path || 'Inbox';
             args.page = args.page || 0;
-            store.getEmails(args.path, args.page*9, 9, function(cachedEmails) {
+            store.getEmails(args.path, args.page*10, 10, function(cachedEmails) {
                 success(cachedEmails.map(deserializeEmail));
-                if (cachedEmails.length < 9) {
-                    fetchAll({ path: args.path, progress: -1 }, args.page*9, 50, function(){});
+                if (cachedEmails.length < 10) {
+                    fetchAll({ path: args.path, progress: -1 }, args.page*10, 50, function(){});
                 }
             });
         },

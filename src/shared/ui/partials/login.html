@@ -1,0 +1,35 @@
+<div ng-controller="LoginController" page>
+    <md-content class="login-content">
+        <md-input-container class="md-block" flex-gt-sm>
+            <label>Username</label>
+            <input type="text" ng-model="account.username">
+            <div class="hint">eg. john.smith@gmail.com</div>
+        </md-input-container>
+        <md-input-container class="md-block" flex-gt-sm>
+            <label>Password</label>
+            <input type="password" ng-model="account.password">
+            <div class="hint">your account's current password</div>
+        </md-input-container>
+        <md-input-container class="md-block" flex-gt-sm>
+            <label>Imap host name</label>
+            <input type="text" ng-model="account.imapHost">
+            <div class="hint">eg. imap-mail.outlook.com</div>
+        </md-input-container>
+        <md-input-container class="md-block" flex-gt-sm>
+            <label>Imap port</label>
+            <input type="number" ng-model="account.imapPort">
+            <div class="hint">given by the host, eg. 993</div>
+        </md-input-container>
+        <md-input-container class="md-block" flex-gt-sm>
+            <label>SMTP host name</label>
+            <input type="text" ng-model="account.smtpHost">
+            <div class="hint">eg. smtp.live.com</div>
+        </md-input-container>
+        <md-input-container class="md-block" flex-gt-sm>
+            <label>SMTP port</label>
+            <input type="number" ng-model="account.smtpPort">
+            <div class="hint">given by the host, eg. 587 or 25</div>
+        </md-input-container>
+        <md-button class="login-btn" ng-click="login()" ng-disabled="loginInProgress">Login</md-button>
+    </md-content>
+</div>

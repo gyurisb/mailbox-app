@@ -1,4 +1,4 @@
-var masterIncludedDivCount = 2;
+var masterIncludedDivCount = 3;
 
 ngApp.factory('$master', ['$rootScope', '$location', '$window',
     function($rootScope, $location, $window) {
@@ -11,15 +11,13 @@ ngApp.factory('$master', ['$rootScope', '$location', '$window',
         $rootScope.$on('$locationChangeStart', function(){
             if ($location.path() != "") {
                 var index = Number($location.path().substr(1));
-                if (index == 0) {
-                    if (firstOnStart) {
-                        firstOnStart = false;
-                    } else {
-                        //TODO: Ettől tönkremegy a kilépés animáció + egyből back nem megy
-                        navigator.app.exitApp();
-                    }
-                }
                 focusPage(index);
+            } else {
+                if (firstOnStart) {
+                    firstOnStart = false;
+                } else {
+                    navigator.app.exitApp();
+                }
             }
         });
         

@@ -68,9 +68,9 @@ app.get('/emails/:path', function (req, res) {
 		res.end(JSON.stringify(error));
    }
 });
-app.get('/emailbody/:uid', function (req, res) {
+app.get('/emailbody/:path/:uid', function (req, res) {
    var conn = sessions[req.get('Authorization')];
-   conn.getEmailBody(req.params.uid, function(body){
+   conn.getEmailBody(req.params.uid, req.params.uid.path, function(body){
 		res.writeHead(200, {'Content-Type': 'application/json'}); 
 		res.end(JSON.stringify(body));
    }, function(error){

@@ -9,8 +9,7 @@ ngApp.controller('FoldersController', ['$scope', '$mailbox', '$app', '$master', 
             $scope.selectedFolder = root.children[0].path;
     }
     
-    $app.onLogin(function(){
-        $master.focus(1);
+    $app.onRestore(function(){
         $mailbox.getFolders().success(foldersLoaded);
     });
     

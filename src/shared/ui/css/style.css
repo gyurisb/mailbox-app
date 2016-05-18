@@ -156,6 +156,10 @@ md-virtual-repeat-container {
     float: right;
 }
 
+.login-content md-input-container {    
+    margin-bottom: -10px;
+}
+
 /*New email old */
 .newEmail table {
     padding: 0px;

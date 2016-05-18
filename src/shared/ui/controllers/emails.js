@@ -2,7 +2,7 @@ ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '
     
     function emailsLoaded(emails) {
         $scope.emails = emails;
-        $master.focus(2);
+        $master.focus(1);
     }
     
     var path;
@@ -10,7 +10,7 @@ ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '
     $scope.emails = [];
     $scope.selectedEmail = null;
     
-    $app.secondaryOnLogin(function(){
+    $app.secondaryOnRestore(function(){
         if (platform == 'desktop') {
             path = 'Inbox';
             $mailbox.getEmails().success(emailsLoaded);

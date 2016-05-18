@@ -74,11 +74,11 @@
     <body ng-app="emailApp" ng-cloak ng-controller="MainController">
         <div master-layout hidden>
             <div ng-include="'partials/layout.html'" onload="loaded()" ></div>
+            <div ng-include="'partials/login.html'" onload="loaded()" ></div>
             <div ng-include="'partials/new.html'" onload="loaded()" ></div>
         </div>
         <div class="app">
-            <button ng-if="loggedIn" id="new-btn" ng-click="newEmail()">New e-mail</button>
-            <div page-view class="toastBounds" style="height: calc(100% - 40px)"></div>
+            <div page-view class="toastBounds" style="height: 100%"></div>
         </div>
     </body>
 </html>

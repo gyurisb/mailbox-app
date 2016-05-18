@@ -2,15 +2,15 @@ ngApp.factory('$app', ['$master',
     function($master) {
         var folderFocusedCallback;
         var emailFocusedCallback;
-        var loginCallback;
-        var loginCallback2;
+        var restoreCallback;
+        var restoreCallback2;
         
         return {
-            onLogin: function(callback) {
-                loginCallback = callback;
+            onRestore: function(callback) {
+                restoreCallback = callback;
             },
-            secondaryOnLogin: function(callback) {
-                loginCallback2 = callback;
+            secondaryOnRestore: function(callback) {
+                restoreCallback2 = callback;
             },
             onFolderFocus: function(callback) {
                 folderFocusedCallback = callback;
@@ -19,8 +19,8 @@ ngApp.factory('$app', ['$master',
                 emailFocusedCallback = callback;
             },
             restore: function() {
-                loginCallback();
-                loginCallback2();
+                restoreCallback();
+                restoreCallback2();
             },
             focusFolder: function(folder) {
                 folderFocusedCallback(folder.path);
