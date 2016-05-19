@@ -14,6 +14,10 @@ gulp.task('clean', function() {
         ]);
 });
 
+gulp.task('clean_full', function() {
+    del(['dist/**/*']);
+});
+
 gulp.task('build', function() {
     
     gulp.src('src/desktop/**')
