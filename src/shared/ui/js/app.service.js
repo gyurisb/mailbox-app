@@ -39,7 +39,7 @@ ngApp.factory('$app', ['$master',
                 if (platform == 'desktop') {
                     remote.getCurrentWindow().close();
                 } else if (platform == 'mobile') {
-                    $master.focus(0);
+                    window.history.back();
                 }
             },
             requestLogin: function() {
@@ -53,7 +53,7 @@ ngApp.factory('$app', ['$master',
                 if (platform == 'desktop') {
                     remote.getCurrentWindow().close();
                 } else if (platform == 'mobile') {
-                    $master.focus(0);
+                    window.history.back();
                 }
             },
         };

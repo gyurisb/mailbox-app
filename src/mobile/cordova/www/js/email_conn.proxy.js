@@ -1,5 +1,5 @@
-var backendHostName = "https://email-globaltransit.rhcloud.com";
-// backendHostName = "";
+// var backendHostName = "https://email-globaltransit.rhcloud.com";
+var backendHostName = "http://192.168.0.11";
 
 function EmailConnectionProxy() {
     var token;
@@ -10,14 +10,17 @@ function EmailConnectionProxy() {
         getFolders: function(success, error) {
             request('GET', 'folders').success(success).error(error);
         },
-        getEmails: function(path, offset, count, success, error) {
-            request('GET', 'emails/' + path + "?offset=" + offset + "&count=" + count).success(success).error(error);
+		getLastEmails: function(path, count, lastDate, success, error) {
+            request('GET', 'lastEmails/' + encodeURIComponent(path) + "?count=" + count + (lastDate ? "&lastDate=" + encodeURIComponent(lastDate.toISOString()) : "")).success(success).error(error);
         },
-        getEmailsAfterUid: function(path, uid, success, error) {
-            request('GET', 'emails/' + path + "?afterUid=" + uid).success(success).error(error);
+		getNewEmails: function(path, firstDate, success, error) {
+            request('GET', 'newEmails/' + encodeURIComponent(path) + "?firstDate=" + encodeURIComponent(firstDate.toISOString())).success(success).error(error);
         },
-        getEmailBody: function(uid, path, success, error) {
-            request('GET', 'emailbody/' + path + '/' + uid).success(success).error(error);
+		setEmailRead: function(path, uid, success, error) {
+            request('POST', 'reademail/' + encodeURIComponent(path) + '/' + uid).success(success).error(error);
+        },
+		getEmailAttachment: function(path, uid, part, success, error) {
+            request('GET', 'attachment/' + encodeURIComponent(path) + '/' + uid + '/' + part).success(success).error(error);
         },
         sendEmail: function(args, success, error) {
             request('POST', 'send', args).success(success).error(error);
@@ -43,6 +46,7 @@ function EmailConnectionProxy() {
                 'Authorization': token || ""
             },
             data: JSON.stringify(data),
+            timeout: 120000,
             success: function(responseData) {
                 if (saveToken)
                     token = responseData;
@@ -50,9 +54,7 @@ function EmailConnectionProxy() {
                     future.onSuccess(responseData);
             },
             error: function(err, status, message) {
-                if (err.status == 401 && window.location.href.indexOf('login') == -1) 
-                    window.location.replace('/#/login?ref=' + encodeURIComponent(window.location.hash));
-                else if (future.onError !== undefined)
+                if (future.onError !== undefined)
                     future.onError(err);
             }
         });

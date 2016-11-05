@@ -73,4 +73,10 @@ ipcMain.on('onMailboxUpdateAsync', function(event, arg) {
     });
 });
 
+ipcMain.on('onAccountUpdateAsync', function(event, arg) {
+    mailbox.onAccountUpdate(function(eventArgs) {
+        event.sender.send('onAccountUpdateReply', eventArgs);
+    });
+});
+
 module.exports = {};

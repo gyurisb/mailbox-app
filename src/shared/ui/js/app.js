@@ -11,16 +11,9 @@ ngApp.config(function($mdThemingProvider, $mdIconProvider) {
        .defaultFontSet('fa fa-lg');
 });
 
-
-ngApp.directive('mailboxLayout', function(){
+ngApp.directive('statusBar', function(){
    return {
-       restrict: 'AE',
-       templateUrl: 'partials/layout.html'
-   }; 
-});
-ngApp.directive('mailboxNew', function(){
-   return {
-       restrict: 'AE',
-       templateUrl: 'partials/new.html'
+       restrict: 'EA',
+       templateUrl: 'partials/statusBar.html',
    }; 
 });

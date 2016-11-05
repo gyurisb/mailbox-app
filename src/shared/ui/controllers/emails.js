@@ -1,60 +1,56 @@
-ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '$filter', '$mdToast', '$document', function($scope, $mailbox, $app, $master, $filter, $mdToast, $document) {
+ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '$filter', '$document', '$window', function($scope, $mailbox, $app, $master, $filter, $document, $window) {
     
-    function emailsLoaded(emails) {
-        $scope.emails = emails;
-        $master.focus(1);
-    }
-    
-    var path;
+    $scope.path = null;
     $scope.page = 0;
     $scope.emails = [];
+    $scope.hasNextPage = false;
     $scope.selectedEmail = null;
+    
+    function loadEmails(currentPath) {
+        $mailbox.getEmails(currentPath || $scope.path, $scope.page*$scope.itemCount, $scope.itemCount + 1).success(function(emails){
+            $master.focus(1);
+            $scope.emails = emails.slice(0, $scope.itemCount);
+            $scope.paddings = [];
+            $scope.hasNextPage = emails.length == $scope.itemCount + 1;
+            for (var i = 0; i < $scope.itemCount - $scope.emails.length; i++)
+                $scope.paddings.push({});
+            if (currentPath)
+                $scope.path = currentPath;
+        });
+    }
     
     $app.secondaryOnRestore(function(){
         if (platform == 'desktop') {
-            path = 'Inbox';
-            $mailbox.getEmails().success(emailsLoaded);
+            loadEmails('Inbox');
         }
     });
     
     $app.onFolderFocus(function(currentPath) {
-        if (currentPath != path) {
-            path = currentPath;
+        if (platform == 'mobile' || currentPath != $scope.path) {
             $scope.page = 0;
-            $mailbox.getEmails(path).success(emailsLoaded);
+            loadEmails(currentPath);
         }
     });
     
-    
-    syncToastMessage = 'Authenticating user accounts.';
-    showToast();
-    
-    $mailbox.onFolderUpdate().success(function(args){
-        if (args.changed && args.folder.path == path) {
-            $mailbox.getEmails(path, $scope.page).success(emailsLoaded);
-        }
-        if (args.folder.progress >= 0) {
-            // syncToastMessage = 'Folder updated: ' + args.folder.name;
-            syncToastMessage = 'Fetching new messages.';
-            syncToastProgress = args.folder.progress;
-            changeSyncToastMessage();
-            showToast();
+    $mailbox.onFolderUpdate().success(function(folder){
+        if (folder.path == $scope.path && $master.isFocused(1)) {
+            loadEmails();
         }
     });
     
     $scope.nextPage = function() {
         $scope.page++;
-        $mailbox.getEmails(path, $scope.page).success(emailsLoaded);
+        loadEmails();
     }
     
     $scope.prevPage = function() {
         $scope.page--;
-        $mailbox.getEmails(path, $scope.page).success(emailsLoaded);
+        loadEmails();
     }
     
     $scope.emailClicked = function(email){
         $scope.selectedEmail = email.uid;
-        $app.focusEmail(email.uid, path);
+        $app.focusEmail(email, $scope.path);
     }
     
     $scope.formatEmailDate = function(dateString) {
@@ -70,33 +66,36 @@ ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '
             return $filter('date')(date, 'shortDate');
         }
     }
-    
-    function showToast() {
-        if (!syncToastOpen) {
-            syncToastOpen = true;
-            $mdToast.show({
-                controller: 'SyncToastController',
-                templateUrl: 'partials/sync.toast.html',
-                hideDelay: false,
-                position: 'top right',
-                parent : $document[0].querySelector('.toastBounds'),
-            });
-        }
+
+    function setEmailListHeight() {
+        var height = $window.innerHeight - (platform == 'desktop' ? (15 + 40) : (24 + 2*8 + 60));
+        var minItemHeight = (platform == 'desktop' ? 58 : 72);
+        $scope.itemCount = Math.floor(height / minItemHeight);
     }
+
+    setEmailListHeight();
+    angular.element($window).bind('resize', function() {
+        var oldItemCount = $scope.itemCount;
+        setEmailListHeight();
+        if (oldItemCount != $scope.itemCount) {
+            if ($scope.selectedEmail && $scope.emails.some(function(e) { return e.uid == $scope.selectedEmail; })) {
+                var selectedPageIndex = $scope.emails.indexOf($scope.emails.filter(function(e) { return e.uid == $scope.selectedEmail; })[0]);
+                var selectedIndex = $scope.page*oldItemCount + selectedPageIndex;
+                $scope.page = Math.floor(selectedIndex / $scope.itemCount);
+            } else {
+                $scope.page = Math.floor($scope.page*oldItemCount / $scope.itemCount);
+            }
+            if ($master.isFocused(1)) {
+                loadEmails();
+            }
+        }
+    });
+
 }]);
 
-var syncToastOpen = false;
-var syncToastMessage = "";
-var syncToastProgress = 0;
-var changeSyncToastMessage = angular.noop;
-ngApp.controller('SyncToastController', ['$scope', '$mdToast', '$timeout', function($scope, $mdToast, $timeout) {
-    $scope.message = syncToastMessage;
-    $scope.progress = syncToastProgress;
-    changeSyncToastMessage = function() {
-        $scope.message = syncToastMessage;
-        $scope.progress = syncToastProgress;
-        if ($scope.progress == 100) {
-            $mdToast.hide();
-        }
-    }
-}]);
+ngApp.directive('emails', function(){
+   return {
+       restrict: 'EA',
+       templateUrl: 'partials/emails.html',
+   }; 
+});

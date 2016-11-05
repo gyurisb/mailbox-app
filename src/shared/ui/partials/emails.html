@@ -1,0 +1,24 @@
+<div ng-controller="EmailsController" class="emails">
+    <md-list class="md-list-email">
+        <md-list-item class="md-2-line" ng-repeat="email in emails" ng-class="{'md-selected': email.uid==selectedEmail, 'md-unseen': !email.seen}" ng-click="emailClicked(email)">
+            <div class="md-list-item-text" layout="column">
+                <p>
+                    <i class="email-from">{{email.senderName || email.senderEmail}}</i>
+                    <span class="email-date">{{formatEmailDate(email.date)}}</span>
+                </p>
+                <h3 class="email-subject">{{email.subject}}</h3>
+            </div>
+        </md-list-item>
+        <div ng-repeat="padding in paddings" class="md-list-email-padding"></div>
+    </md-list>
+    <section class="emails-footer">
+        <md-button class="md-icon-button" aria-label="Previous page" ng-disabled="page == 0" ng-click="prevPage()">
+            <md-icon>&#xf0d9;</md-icon>
+        </md-button>
+        <span>Page {{page + 1}}</span>
+        <md-button class="md-icon-button" aria-label="Next page" ng-disabled="!hasNextPage" ng-click="nextPage()">
+            <md-icon>&#xf0da;</md-icon>
+        </md-button>
+        <md-progress-linear ng-if="folderInProgress[path]" md-mode="indeterminate"></md-progress-linear>
+    </section>
+</div>

@@ -1,0 +1,27 @@
+<div ng-controller="FoldersController" class="folders">
+    <md-menu class="account-label">
+        <span ng-click="$mdOpenMenu($event)">{{emailAddress}}</span>
+        <md-menu-content width="4">
+            <md-menu-item>
+                <md-button>{{emailAddress}}</md-button>
+            </md-menu-item>
+            <md-menu-divider></md-menu-divider>
+            <md-menu-item>
+                <md-button ng-click="editAccount()">Account settings</md-button>
+            </md-menu-item>
+            <md-menu-item>
+                <md-button ng-click="logout()">Logout</md-button>
+            </md-menu-item>
+        </md-menu-content>
+    </md-menu>
+    <div class="folders-flex">
+        <div class="folders-container">
+            <folder ng-repeat="folder in root.children" model="folder" selected-folder="selectedFolder" folder-clicked="folderClicked">
+            </folder>
+        </div>
+    </div>
+    <md-button ng-click="newEmail()" class="new-email-btn">
+        <span>New e-mail</span>
+        <md-icon>&#xf055;</md-icon>
+    </md-button>
+</div>

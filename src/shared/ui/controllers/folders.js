@@ -1,12 +1,13 @@
 ngApp.controller('FoldersController', ['$scope', '$mailbox', '$app', '$master', function($scope, $mailbox, $app, $master) {
 
     $scope.selectedFolder = null;
-    $scope.updatedFolders = {};
     
     function foldersLoaded(root) {
-        $scope.root = root;
-        if ($scope.selectedFolder == null)
-            $scope.selectedFolder = root.children[0].path;
+        if (!angular.equals(root, $scope.root)) {
+            $scope.root = root;
+            if ($scope.selectedFolder == null && root && root.children.length)
+                $scope.selectedFolder = root.children[0].path;
+        }
     }
     
     $app.onRestore(function(){
@@ -16,11 +17,7 @@ ngApp.controller('FoldersController', ['$scope', '$mailbox', '$app', '$master', 
     $mailbox.onMailboxUpdate().success(function(){
         $mailbox.getFolders().success(foldersLoaded);
     });
-    
-    // $mailbox.onFolderUpdate().success(function(args){
-    //     $scope.updatedFolders[args.folder.path] = true;
-    // });
-    
+
     $scope.folderClicked = function(folder) {
         $scope.selectedFolder = folder.path;
         $app.focusFolder(folder);
@@ -31,32 +28,9 @@ ngApp.controller('FoldersController', ['$scope', '$mailbox', '$app', '$master', 
     }    
 }]);
 
-ngApp.directive('mailboxFolder', function(){
+ngApp.directive('folders', function(){
    return {
-       restrict: 'E',
-       scope: {
-        folder: '=model',
-        selectedFolder: '=selectedFolder',
-        folderClicked: '=folderClicked',
-        updatedFolders: "=updatedFolders"
-       },
-       templateUrl: 'partials/folder.directive.html',
-       link: function(scope, element) {
-           scope.close = function($event) {
-               $event.stopPropagation();
-               scope.folder.closed = true;
-           };
-           scope.open = function($event) {
-               $event.stopPropagation();
-               scope.folder.closed = undefined;
-           };
-           scope.hasChildren = function() {
-               return scope.folder.children !== undefined && scope.folder.children.length > 0;
-           };
-           scope.getHeight = function() {
-               var eHeight = parseInt($(element).find(':first-child').css('max-height'));
-               return scope.folder.children.length * eHeight;
-           }
-       }
+       restrict: 'EA',
+       templateUrl: 'partials/folders.html',
    }; 
 });

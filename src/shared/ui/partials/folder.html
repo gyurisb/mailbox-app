@@ -1,0 +1,16 @@
+<md-list-item ng-class="{'md-selected': folder.path==selectedFolder, 'md-unseen': folder.unseen > 0}" ng-click="folderClicked(folder)" class="md-list-folder">
+    <div class="md-list-item-text" layout="column">
+        <p>
+            {{folder.name}}
+            <span ng-if="folder.unseen > 0">({{folder.unseen}})</span>
+            <span ng-if="hasChildren()" style="float: right">
+                <button ng-if="!closeds[folder.path]" ng-click="close($event)" class="folder-hide-btn">-</button>
+                <button ng-if="closeds[folder.path]" ng-click="open($event)" class="folder-hide-btn">+</button>
+            </span>
+        </p>
+    </div>
+</md-list-item>
+<div ng-if="hasChildren()" ng-style="{ height: (!closeds[folder.path] ? getHeight() : 0) + 'px' }" class="folder-group animate-folder-group">
+    <folder ng-repeat="child in folder.children" model="child" closeds="closeds" selected-folder="selectedFolder" folder-clicked="folderClicked">
+    </folder>
+</div>

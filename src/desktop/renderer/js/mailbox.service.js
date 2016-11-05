@@ -2,7 +2,7 @@ var mailboxServiceCount = 0;
 ngApp.factory('$mailbox', ['$timeout',
     function($timeout) {
         mailboxServiceCount++;
-        var actions = ['login', 'restore', 'getFolders', 'getEmails', 'getEmailBody', 'sendEmail', 'contacts', 'onFolderUpdate', 'onMailboxUpdate'];
+        var actions = ['login', 'restore', 'getFolders', 'getEmails', 'getEmailBody', 'sendEmail', 'contacts', 'onFolderUpdate', 'onMailboxUpdate', 'onAccountUpdate'];
         var replyHandlers = {};
         var errorHandlers = {};
         actions.forEach(function(action){
@@ -25,11 +25,11 @@ ngApp.factory('$mailbox', ['$timeout',
             getFolders: function() {
                 return ipc('getFolders');
             },
-            getEmails: function(path, page) {
-                return ipc('getEmails', { path: path, page: page });
+            getEmails: function(path, offset, count) {
+                return ipc('getEmails', { path: path, offset: offset, count: count });
             },
-            getEmailBody: function(uid, path) {
-                return ipc('getEmailBody', { uid: uid, path: path });
+            getEmailBody: function(path, uid, seen) {
+                return ipc('getEmailBody', { uid: uid, path: path, seen: seen });
             },
             sendEmail: function(args) {
                 return ipc('sendEmail', args);
@@ -42,6 +42,9 @@ ngApp.factory('$mailbox', ['$timeout',
             },
             onMailboxUpdate: function() {
                 return ipc('onMailboxUpdate');
+            },
+            onAccountUpdate: function() {
+                return ipc('onAccountUpdate');
             },
             onError: function(handler) {
                 errorHandler = handler;

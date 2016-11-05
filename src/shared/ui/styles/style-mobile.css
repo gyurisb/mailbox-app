@@ -1,0 +1,191 @@
+*:not(input):not(textarea) {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -ms-content-zooming: none;
+}
+
+/*@-ms-viewport {
+    width: 80%; 
+}*/
+
+/*html, body {
+    -ms-user-select: none;
+    -ms-content-zooming: none;
+    -ms-touch-action: none;
+}*/
+
+html, body, .app {
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    overflow: hidden;
+}
+
+iframe {
+    height: 100%;
+    width: 100%;
+    padding: 0px;
+    border: 0px;
+    margin: 0px;
+}
+
+.header {
+    position: fixed;
+    width: 100%;
+    height: 60px;
+}
+.body {
+    position: absolute;
+    top: 60px;
+    width: 100%;
+    height: calc(100% - 60px);
+    overflow: auto;
+}
+
+.body > * {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.body > * > * {
+    height: 100% !important;
+}
+
+/* Common things */
+
+#login-area input, #login-area button {
+    width: calc(100% - 10px);
+    display: block;
+    height: 30px;
+    margin: auto;
+}
+#login-area {
+    padding-top: 20px;
+}
+
+#new-btn {
+    height: 40px;
+    background: #8080D8;
+    color: white;
+    width: 100%;
+    border: 0px;
+}
+
+.new-email-text {
+    height: 100%;
+    width: 100%;
+    border-color: rgba(0, 0, 0, 0.117647);
+}
+
+.md-list-email-padding {
+    min-height: 71px;
+}
+
+.login-btn {
+    margin-top: 20px !important;
+    float: right;
+}
+
+/* Folder list styles */
+
+.folders-flex {
+    height: calc(100% - 50px - 39px);
+    overflow: auto;
+}
+.account-label > span {
+    font-size: 16px;
+}
+.md-list-folder {
+    min-height: 0px;
+    max-height: 68px;
+}
+.folder-group {
+    padding-left: 20px;
+}
+.new-email-btn {
+    font-size: 16px !important;
+    height: 50px;
+}
+
+/* Email list style */
+
+.emails-footer {
+    position: fixed;
+    bottom: 0;
+    text-align: center; 
+    width: 100%;
+}
+
+.emails-footer > * {
+    display: inline-block;
+}
+
+.emails-footer md-progress-linear {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    width: 100%;
+}
+
+/* Reader style */
+.reader {
+    height: calc(100% - 5px);
+} 
+.email-header {
+    height: 189px;
+}
+.email-header p {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.email-area {
+    height: calc(100% - 200px);
+}
+
+/* App bar styles */
+.header {
+    background-color: #4286f5;
+    color: white;
+    box-shadow: 0 1px 3px #888888;
+}
+.header-back {
+    display: inline-block;
+    cursor: pointer;
+    position: absolute;
+    font-weight: bold;
+    padding: 19px 15px;
+    font-size: 21px;
+}
+.header-title {    
+    font-weight: bold;
+    position: absolute;
+    right: 30px;
+    left: 30px;
+    top: 21px;
+    text-align: center;
+    font-size: 18px;
+}
+.status-bar md-progress-linear {
+    position: absolute;
+    left: 0px;
+    top: 55px;
+    width: 100%;
+}
+.status-bar > span {
+    display: none;
+}
+
+/* New Email */
+
+md-virtual-repeat-container {
+    left: 5px !important;
+    width: calc(100% - 10px) !important;
+    min-width: calc(100% - 10px) !important;
+    max-width: calc(100% - 10px) !important;
+}

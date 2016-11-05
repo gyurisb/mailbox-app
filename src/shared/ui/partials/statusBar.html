@@ -1,0 +1,9 @@
+<div class="status-bar" ng-class="phaseClass">
+    <span ng-if="phase == 'noaccount'">Prepare your account settings!</span>
+    <span ng-if="phase == 'login'">Authenticating</span>
+    <span ng-if="phase == 'folders'">Syncing folders</span>
+    <span ng-if="phase == 'emails'">Syncing messages</span>
+    <span ng-if="phase == 'done'">Last sync: {{syncDate | date:'medium'}}</span>
+    <span ng-if="phase == 'error'">An error occured during the synchronization of the account.</span>
+    <md-progress-linear ng-if="progress != null" md-mode="{{progress >= 0 ? 'determinate' : 'indeterminate'}}" value="{{progress}}"></md-progress-linear>
+</div>

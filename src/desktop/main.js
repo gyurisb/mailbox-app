@@ -18,37 +18,7 @@ let mainWindow;
 function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({width: 1200, height: 700});
-  //mainWindow.setMenu(null);
-  var template = [
-      {
-          label: 'File',
-          submenu: [
-            {
-                label: "Open"
-            },
-            {
-                label: "Save",
-                accelerator: 'Command+S'
-            },
-            {
-                label: "Exit",
-            }
-          ]
-      },
-      {
-          label: "Debug",
-          submenu: [
-            {
-                label: "Open inspection",
-                click: function() {
-                mainWindow.webContents.openDevTools();
-                }
-            }
-          ]
-      }
-  ];
-  var menu = Menu.buildFromTemplate(template);
-  mainWindow.setMenu(menu);
+  createDebugMenu(mainWindow);
 
   // and load the index.html of the app.
   mainWindow.loadURL('file://' + __dirname + '/renderer/index.html');
@@ -85,21 +55,7 @@ app.on('activate', function () {
 
 ipcMain.on('openNewEmailWindow', function(event, arg) {
   var newWindow = new BrowserWindow({width: 1024, height: 768});
-  var template = [
-      {
-          label: "Debug",
-          submenu: [
-            {
-                label: "Open inspection",
-                click: function() {
-                newWindow.webContents.openDevTools();
-                }
-            }
-          ]
-      }
-  ];
-  var menu = Menu.buildFromTemplate(template);
-  newWindow.setMenu(menu);
+  createDebugMenu(newWindow);
   newWindow.loadURL('file://' + __dirname + '/renderer/new.html');
   newWindow.on('closed', function() {});
 });
@@ -107,11 +63,46 @@ ipcMain.on('openNewEmailWindow', function(event, arg) {
 
 ipcMain.on('openNewLoginDialog', function(event, arg) {
   var newWindow = new BrowserWindow({width: 400, height: 545});
-  newWindow.setMenuBarVisibility(false);
-  newWindow.setAutoHideMenuBar(true);
+  createDebugMenu(newWindow);
   newWindow.loadURL('file://' + __dirname + '/renderer/login.html');
   newWindow.on('closed', function() {});
 });
 
 ipcMain.on('closeWindow', function(event, arg) {
 });
+
+function createDebugMenu(newWindow) {
+  var template = [
+      {
+          label: 'File',
+          submenu: [
+            {
+                label: "Open"
+            },
+            {
+                label: "Save",
+                accelerator: 'Command+S'
+            },
+            {
+                label: "Exit",
+            }
+          ]
+      },
+      {
+          label: "Debug",
+          submenu: [
+            {
+                label: "Open inspection",
+                accelerator: "F12",
+                click: function() {
+                  newWindow.webContents.openDevTools();
+                }
+            }
+          ]
+      }
+  ];
+  var menu = Menu.buildFromTemplate(template);
+  newWindow.setMenu(menu);
+  newWindow.setMenuBarVisibility(false);
+  newWindow.setAutoHideMenuBar(true);
+}

@@ -1,4 +1,4 @@
-<div class="newEmail" ng-controller="NewController" page>
+<div class="new-email" ng-controller="NewController" page>
     <md-content style="height: 100%">
         <table style="padding: 0px 5px">
             <tr>
@@ -22,9 +22,10 @@
                     </md-input-container>
                 </td>
             </tr>
-            <tr>
-                <td style="height: 100%" valign="top">
-                    <textarea ng-model="text" style="height: 200px;width: 100%;border-color: rgba(0, 0, 0, 0.117647);"></textarea>
+            <tr style="height: 100%">
+                <td style="height: 100%">
+                    <textarea ng-if="allowFormatting" ui-tinymce="tinymceOptions" ng-model="text" class="new-email-text" hidden></textarea>
+                    <textarea ng-if="!allowFormatting" ng-model="text" class="new-email-text"></textarea>
                 </td>
             </tr>
             <tr>

@@ -17,14 +17,14 @@ ngApp.factory('$mailbox', ['$timeout',
                 mailbox.getFolders(p.performSuccess, p.performError);
                 return p.future;
             },
-            getEmails: function(path, page) {
+            getEmails: function(path, offset, count) {
                 var p = angularPromise();
-                mailbox.getEmails({ path: path, page: page }, p.performSuccess, p.performError);
+                mailbox.getEmails({ path: path, offset: offset, count: count }, p.performSuccess, p.performError);
                 return p.future;
             },
-            getEmailBody: function(uid, path) {
+            getEmailBody: function(path, uid, seen) {
                 var p = angularPromise();
-                mailbox.getEmailBody({ uid: uid, path: path }, p.performSuccess, p.performError);
+                mailbox.getEmailBody({ uid: uid, path: path, seen: seen }, p.performSuccess, p.performError);
                 return p.future;
             },
             sendEmail: function(args) {
@@ -45,6 +45,11 @@ ngApp.factory('$mailbox', ['$timeout',
             onMailboxUpdate: function() {
                 var p = angularPromise();
                 mailbox.onMailboxUpdate(p.performSuccess);
+                return p.future;
+            },
+            onAccountUpdate: function() {
+                var p = angularPromise();
+                mailbox.onAccountUpdate(p.performSuccess);
                 return p.future;
             },
             onError: function(callback) {}

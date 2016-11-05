@@ -16,6 +16,7 @@
     "mailbuild": "0.3.7",
     "mimeparser": "0.3.8",
     "semaphore": "^1.0.5",
-    "wo-smtpclient": "0.6.1"
+    "wo-smtpclient": "0.6.1",
+    "emailjs-mime-parser": "1.0.0"
   }
 }

@@ -1,20 +1,23 @@
 ngApp.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$timeout', '$app', function($scope, $mailbox, $master, $q, $timeout, $app) {
     
-    $scope.tinymceOptions = {
-        onChange: function(e) {
-          // put logic here for keypress and cut/paste changes
-        },
-        height: 400,
-        plugins: [
-            'advlist autolink lists link image charmap print preview anchor',
-            'searchreplace visualblocks code fullscreen',
-            'insertdatetime media table contextmenu paste code'
-        ],
-        menubar: false,
-        statusbar: false,
-        toolbar: 'insertfile undo redo | styleselect | fontselect fontsizeselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
-        content_css: 'css/style-email.css'
-    };
+    if (platform == "desktop") {
+        $scope.tinymceOptions = {
+            onChange: function(e) {
+            // put logic here for keypress and cut/paste changes
+            },
+            height: 400,
+            plugins: [
+                'advlist autolink lists link image charmap print preview anchor',
+                'searchreplace visualblocks code fullscreen',
+                'insertdatetime media table contextmenu paste code'
+            ],
+            menubar: false,
+            statusbar: false,
+            toolbar: 'insertfile undo redo | styleselect | fontselect fontsizeselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+            content_css: 'css/style-email.css'
+        };
+        $scope.allowFormatting = true;
+    }
     
     $mailbox.onError(function(error) {
         alert(JSON.stringify(error));
@@ -46,3 +49,10 @@ ngApp.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$time
         });
     }
 }]);
+
+ngApp.directive('new', function(){
+   return {
+       restrict: 'AE',
+       templateUrl: 'partials/new.html'
+   }; 
+});

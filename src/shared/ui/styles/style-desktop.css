@@ -1,0 +1,195 @@
+/* Layout style */
+
+html, body {
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.body-row {
+    flex: 1;
+    display: flex;
+}
+
+md-list-item.md-selected {
+    background: #d2d2d2;
+}
+
+.login-btn {
+    margin-top: 40px !important;
+    float: right;
+}
+
+/*Reader style*/
+reader {
+    flex: 1;
+    display: flex;
+}
+.reader {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.email-area {
+    flex: 1;
+    position: relative;
+}
+.email-area iframe {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding: 0px;
+    border: 0px;
+    margin: 0px;
+}
+
+/* Status bar style */
+.status-bar {
+    display: flex;
+    height: 15px;
+    padding: 5px;
+    text-align: right;
+    background-color: #008CFF;
+    color: white;
+    position: relative;
+    z-index: 100;
+    font-size: 14px;
+    align-items: center;
+}
+.status-bar > span {
+    flex: 1;
+}
+.status-bar md-progress-linear {
+    width: 100px;
+    margin-left: 10px;
+}
+.status-bar.phase-error {
+    background-color: #c12127;
+}
+
+/* Folder menu styles */
+.folders-nav {
+    width: 200px;
+    background-color: #F1F1F1;
+    display: flex;
+}
+.folders {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.folders-flex {
+    flex: 1;
+    position: relative;
+}
+.folders-container {
+    overflow-y: auto;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+.folders-container::-webkit-scrollbar {
+    width: 10px;
+}
+.folders-container::-webkit-scrollbar-track {
+    border-left: 1px solid rgba(0,0,0,0.2);
+}
+.folders-container::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+}
+.account-label {
+    padding: 0px !important;
+}
+.md-list-folder {
+    line-height: normal;
+    font-size: 14px;
+    margin: 0px;
+    min-height: 0px;
+    max-height: 36px;
+}
+.md-list-folder .md-list-item-inner {
+    min-height: 0px;
+}
+.md-list-folder p {
+    line-height: normal;
+    font-size: 14px;
+    margin: 5px 0px;
+}
+.folder-group {
+    padding-left: 10px;
+}
+
+/* Email menu styles */
+.emails-nav {
+    overflow: hidden;
+    display: flex;
+}
+.emails {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.md-list-email {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.md-list-email > * {
+    flex: 1;
+}
+.emails-footer {
+    align-items: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+p.email-subject {
+    color: black;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.md-list-email md-list-item.md-2-line, .md-list-email md-list-item.md-2-line button, .md-list-email-padding {
+    min-height: 58px;
+}
+.md-list-email {
+    padding: 0px;
+}
+.emails-footer md-progress-linear {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+
+/* New email */
+
+.mce-tinymce:not(.mce-floatpanel), .mce-edit-area.mce-container, .mce-container-body.mce-stack-layout {
+    height: 100% !important;
+    border-width: 0px !important;
+}
+.mce-edit-area.mce-container {
+    height: calc(100% - 36px) !important;
+    overflow-y: auto;
+    border-width: 0px !important;
+}
+.mce-tinymce iframe {
+    cursor: text;
+    height: 100% !important;
+}
+.mce-toolbar-grp, .mce-toolbar-grp .mce-btn {
+    background-color: white !important;
+}
+.mce-toolbar-grp {
+    padding-bottom: 15px;
+}
+
+md-virtual-repeat-container {
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
+}

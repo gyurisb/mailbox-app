@@ -1,0 +1,22 @@
+<div ng-controller="ReaderController" class="reader">
+    <md-card ng-if="email" class="email-header">
+        <md-card-content>
+            <p class="email-header-subject">{{email.subject}}</p>
+            <p>from {{formatContact(email.senderName, email.senderEmail)}}</p>
+            <p>
+                <span>to {{formatContact(email.recipientName, email.recipientEmail)}}</span>
+                <span ng-repeat="ccRecipient in email.ccRecipients">, {{formatContact(ccRecipient.name, ccRecipient.email)}}</span>
+            </p>
+            <p>sent at {{formatEmailDate(email.date)}}</p>
+            <p ng-if="attachments.length > 0">attachments: <span ng-repeat="attachment in attachments"><a href>{{attachment.name}}</a> </span></p>
+        </md-card-content>
+        <md-card-actions>
+            <md-button>Reply</md-button>
+            <md-button ng-if="email.ccRecipients.length > 0">Reply All</md-button>
+            <md-button>Forward</md-button>
+        </md-card-actions>
+    </md-card>
+    <div class="email-area">
+        <iframe id="email-frame" sandbox="allow-scripts allow-same-origin" src="about:blank"></iframe>
+    </div>
+</div>

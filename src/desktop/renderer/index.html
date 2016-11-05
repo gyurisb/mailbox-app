@@ -25,15 +25,25 @@
     <script src="js/app.service.js"></script>
     <script src="js/mailbox.service.js"></script>
     <script src="controllers/main.js"></script>
-    <script src="controllers/login.js"></script>
+    <script src="controllers/folder.js"></script>
     <script src="controllers/folders.js"></script>
     <script src="controllers/emails.js"></script>
     <script src="controllers/reader.js"></script>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/style-desktop.css">
-    <link rel="stylesheet" href="css/angular-material.css">
-    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <script src="controllers/login.js"></script>
+    <script src="controllers/new.js"></script>
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/style-desktop.css">
+    <link rel="stylesheet" href="lib/css/angular-material.css">
+    <link rel="stylesheet" href="lib/css/font-awesome.min.css">
   </head>
-  <body ng-app="emailApp" mailbox-layout layout="column" ng-controller="MainController" ng-cloak>
+  <body ng-app="emailApp" ng-controller="MainController" ng-cloak>
+     <div class="body-row">
+        <md-sidenav folders md-is-locked-open="$mdMedia('gt-sm')" class="folders-nav md-whiteframe-z2">
+        </md-sidenav>
+        <md-sidenav emails md-is-locked-open="$mdMedia('gt-sm')" class="emails-nav md-whiteframe-z2">
+        </md-sidenav>
+        <reader></reader>
+     </div>
+     <status-bar></status-bar>
   </body>
 </html>

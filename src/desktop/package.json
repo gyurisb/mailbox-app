@@ -30,6 +30,7 @@
     "jquery": "2.2.0",
     "mailbuild": "0.3.7",
     "mimeparser": "0.3.8",
+    "emailjs-mime-parser": "1.0.0",
     "wo-smtpclient": "0.6.1"
   },
   "dependencies": {

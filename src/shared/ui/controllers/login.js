@@ -11,9 +11,17 @@ ngApp.controller('LoginController', ['$scope', '$location', '$app', '$mailbox', 
     
     $scope.login = function() {
         $scope.loginInProgress = true;
+        var userName = $scope.account.username;
         $mailbox.login($scope.account).success(function(){
             $scope.loginInProgress = false;
-            $app.login();
+            $app.login(userName);
         });
     }
 }]);
+
+ngApp.directive('login', function(){
+   return {
+       restrict: 'EA',
+       templateUrl: 'partials/login.html',
+   }; 
+});

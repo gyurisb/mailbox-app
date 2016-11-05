@@ -5,12 +5,13 @@ function Mailbox(db, EmailConnection, EmailStore) {
     var conn;
     var folderUpdateCallback = function(){};
     var mailboxUpdateCallback = function(){};
+    var accountUpdateCallback = function(){};
     
     return {
         login: function(credentials, success, error) {
             login(credentials, function() {
-                //TODO értesíteni a főablakot hogy bejelentkezés történt
                 success();
+                accountUpdateCallback({ type: "account", email: credentials.username });
                 mainStore.saveAccount(credentials);
                 fetch();
             }, error);
@@ -21,15 +22,21 @@ function Mailbox(db, EmailConnection, EmailStore) {
                 mainStore.getAccounts(function(accounts) {
                     accounts = accounts || [];
                     accounts.forEach(function(account){
+                        accountUpdateCallback({ type: "progress", phase: "login", progress: -1 });
                         store = new mainStore.Account(account.username);
                         login(account, function(){
                             fetch();
-                        }, error);
+                        }, function(err){
+                            error(err);
+                            accountUpdateCallback({ type: "progress", phase: "error", error: err });
+                        });
                     });
                     if (accounts.length == 0) {
                         success();
+                        accountUpdateCallback({ type: "account" });
                     } else {
-                        success(accounts[0].username);
+                        success();
+                        accountUpdateCallback({ type: "account", email: accounts[0].username });
                     }
                 });
             });
@@ -45,17 +52,32 @@ function Mailbox(db, EmailConnection, EmailStore) {
         getEmails: function(args, success, error) {
             args = args || {};
             args.path = args.path || 'Inbox';
-            args.page = args.page || 0;
-            store.getEmails(args.path, args.page*10, 10, function(cachedEmails) {
-                success(cachedEmails.map(deserializeEmail));
-                if (cachedEmails.length < 10) {
-                    fetchAll({ path: args.path, progress: -1 }, args.page*10, 50, function(){});
+            store.getEmails(args.path, args.offset, args.count, function(cachedEmails) {
+                success(cachedEmails);
+                if (cachedEmails.length < args.count) {
+                    store.getFolder(args.path, function(folder) {
+                        if (folder && !folder.totalSynced) {
+                            store.getOldestDate(args.path, function(oldestDate){
+                                accountUpdateCallback({ type: "folderProgress", folder: args.path, progress: true });
+                                fetchAll({ path: args.path }, 21, oldestDate, function(){
+                                    accountUpdateCallback({ type: "folderProgress", folder: args.path, progress: false });
+                                }); 
+                            });
+                        }
+                    });
                 }
             });
         },
         getEmailBody: function(args, success, error) {
-            if (conn !== undefined) {
-                conn.getEmailBody(args.uid, args.path, success, error);
+            store.getEmailBody(args.path, args.uid, function(body){
+                success(body);
+            });
+            if (!args.seen) {
+                store.seeEmail(args.path, args.uid, function(){
+                    mailboxUpdateCallback();
+                    folderUpdateCallback({ path: args.path });
+                });
+                conn.setEmailRead(args.path, args.uid, function(){}, accountError);
             }
         },
         sendEmail: function(args, success, error) {
@@ -69,59 +91,82 @@ function Mailbox(db, EmailConnection, EmailStore) {
         },
         onMailboxUpdate: function(callback) {
             mailboxUpdateCallback = callback;
+        },
+        onAccountUpdate: function(callback) {
+            accountUpdateCallback = callback;
         }
     };
-    
+
     function fetch() {
+        accountUpdateCallback({ type: "progress", phase: "folders", progress: -1 });
         conn.getFolders(function(root) {
             var folders = flattenFolders(root);
             store.saveFolders(folders, function(changed) {
                 if (changed) {
                     mailboxUpdateCallback();
                 }
-                //TODO: fölösleges újratöltés művelet, ha nincs módosítás
+                //TODO: ha !changed akkor fölösleges getFolders művelet (mert savedFolders == folders)
                 store.getFolders(function(savedFolders){
                     fetchFolders(savedFolders);
                 });
             });
-        }, function(){});
+        }, accountError);
     }
     
     function fetchFolders(folders, i) {
         i = i || 0;
-        if (i >= folders.length)
+        if (i >= folders.length) {
+            accountDone();
             return;
+        }
+        accountUpdateCallback({ type: "progress", phase: "emails", progress: i*100 / folders.length });
         var folder = folders[i];
-        folder.progress = (i + 1)*100 / folders.length;
-        store.getLastUid(folder.path, function(lastUid){
-            if (lastUid === undefined || lastUid === null) {
-                fetchAll(folder, 0, 100, function(){
-                    fetchFolders(folders, i + 1);
+        if (!folder.lastSynced) {
+            fetchAll(folder, 20, null, function(){
+                fetchFolders(folders, i + 1);
+            });
+        } else {
+            fetchNew(folder, new Date(folder.lastSynced), function(){
+                fetchFolders(folders, i + 1);
+            });
+        }
+    }
+
+    function fetchAll(folder, count, lastDate, success) {
+        conn.getLastEmails(folder.path, count, lastDate, function(result){
+            syncFolderIfRequired(function(){
+                success();
+                store.setTotalSynced(folder.path, !result.hasMore, function(){
+                    store.saveEmails(result.messages, folder.path, function(savedEmailsCount){
+                        if (savedEmailsCount > 0) {
+                            folderUpdateCallback(folder);
+                            mailboxUpdateCallback();
+                        }
+                    });
                 });
+            });
+        }, accountError);
+        function syncFolderIfRequired(success) {
+            if (!lastDate) {
+                store.syncFolder(folder.path, success);
             } else {
-                fetchNew(folder, lastUid, function(){
-                    fetchFolders(folders, i + 1);
-                });
+                success();
             }
-        });
+        }
     }
     
-    function fetchAll(folder, offset, count, success) {
-        conn.getEmails(folder.path, offset, count, function(emails){
-            success();
-            store.saveEmails(emails, folder.path, function(savedEmailsCount){
-                folderUpdateCallback({folder: folder, changed: savedEmailsCount > 0 });
+    function fetchNew(folder, firstDate, success) {
+        conn.getNewEmails(folder.path, firstDate, function(emails) {
+            store.syncFolder(folder.path, function() {
+                success();
+                store.saveEmails(emails, folder.path, function(){
+                    if (emails.length > 0) {
+                        folderUpdateCallback(folder);
+                        mailboxUpdateCallback();
+                    }
+                });
             });
-        });
-    }
-    
-    function fetchNew(folder, lastUid, success) {
-        conn.getEmailsAfterUid(folder.path, lastUid, function(emails) {
-            success();
-            store.saveEmails(emails, folder.path, function(){
-                folderUpdateCallback({folder: folder, changed: emails.length > 0 });
-            });
-        }, function(){});
+        }, accountError);
     }
     
     function login(credentials, success, error) {
@@ -132,6 +177,16 @@ function Mailbox(db, EmailConnection, EmailStore) {
             connections.push(newConn);
             success();
         }, error);
+    }
+
+    function accountDone() {
+        store.getSyncDate(function(syncDate){
+            accountUpdateCallback({ type: "progress", phase: "done", syncDate: syncDate });
+        });
+    }
+    
+    function accountError(err) {
+        accountUpdateCallback({ type: "progress", phase: "error", error: err });
     }
     
     function flattenFolders(folder) {
@@ -154,26 +209,19 @@ function Mailbox(db, EmailConnection, EmailStore) {
         depth = depth || 0;
         var children = folders.filter(function(f) { return f.path.indexOf(root.path) == 0 && (f.path.match(/\//g)||[]).length == depth; });
         children.forEach(function(child){
-            var folder = { children: [], path: child.path, name: child.name };
+            var folder = { children: [], path: child.path, name: child.name, unseen: child.unseen };
             root.children.push(folder);
             deserializeFolders(folders, folder, depth + 1);
         });
         return root;
     }
-    
-    function deserializeEmail(email) {
-        return {
-            uid: email.uid,
-            envelope: {
-                date: email.date,
-                subject: email.subject,
-                from: [{
-                    name: email.senderName,
-                    address: email.senderEmail
-                }]
-            }
-        };
-    }
+
+    // function serializeEmails(emails) {
+
+    // }
+    // function deserializeEmails(emails) {
+
+    // }
 }
 
 module.exports = Mailbox;

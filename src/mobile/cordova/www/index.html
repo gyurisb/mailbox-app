@@ -28,15 +28,16 @@
             * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
                 * Enable inline JS: add 'unsafe-inline' to default-src
         -->
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">
+        <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">-->
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+        <meta http-equiv="Content-Security-Policy" content="default-src *; style-src * 'self' 'unsafe-inline' 'unsafe-eval'; script-src * 'self' 'unsafe-inline' 'unsafe-eval';">
         
-        <link rel="stylesheet" type="text/css" href="css/style.css">
-        <link rel="stylesheet" type="text/css" href="css/style-mobile.css">
-        <link rel="stylesheet" type="text/css" href="css/angular-material.min.css">
-        <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
+        <link rel="stylesheet" type="text/css" href="styles/style.css">
+        <link rel="stylesheet" type="text/css" href="styles/style-mobile.css">
+        <link rel="stylesheet" type="text/css" href="lib/css/angular-material.min.css">
+        <link rel="stylesheet" type="text/css" href="lib/css/font-awesome.min.css">
         
         <script type="text/javascript" src="lib/winstore-jscompat.js"></script>
         <script type="text/javascript" src="lib/jquery.min.js"></script>
@@ -48,7 +49,6 @@
         <script type="text/javascript" src="lib/angular/angular-material.min.js"></script>
         <script type="text/javascript" src="lib/tinymce/tinymce.min.js"></script>
         <script type="text/javascript" src="lib/angular/angular-ui-tinymce.min.js"></script>
-        <!--<script type="text/javascript" src="lib/angular/angular-ui-sortable.min.js"></script>-->
         <script type="text/javascript" src="lib/nprogress.js"></script>
         
         <script type="text/javascript" src="js/index.js"></script>
@@ -64,6 +64,7 @@
         <script type="text/javascript" src="controllers/main.js"></script>
         <script type="text/javascript" src="controllers/login.js"></script>
         <script type="text/javascript" src="controllers/folders.js"></script>
+        <script type="text/javascript" src="controllers/folder.js"></script>
         <script type="text/javascript" src="controllers/emails.js"></script>
         <script type="text/javascript" src="controllers/reader.js"></script>
         <script type="text/javascript" src="controllers/new.js"></script>
@@ -72,13 +73,19 @@
         <title>Mailbox</title>
     </head>
     <body ng-app="emailApp" ng-cloak ng-controller="MainController">
-        <div master-layout hidden>
-            <div ng-include="'partials/layout.html'" onload="loaded()" ></div>
-            <div ng-include="'partials/login.html'" onload="loaded()" ></div>
-            <div ng-include="'partials/new.html'" onload="loaded()" ></div>
-        </div>
         <div class="app">
-            <div page-view class="toastBounds" style="height: 100%"></div>
+            <div class="header">
+                <div ng-click="back()" class="header-back">&larr;</div>
+                <div class="header-title">{{title}}</div>
+                <status-bar></status-bar>
+            </div>
+            <div class="body">
+                <folders ng-show="path == 0"></folders>
+                <emails ng-show="path == 1"></emails>
+                <reader ng-show="path == 2"></reader>
+                <login ng-show="path == 3"></login>
+                <div new ng-show="path == 4"></div>
+            </div>
         </div>
     </body>
 </html>

@@ -52,13 +52,9 @@ app.get('/folders', function (req, res) {
 		res.end(JSON.stringify(error));
    });
 });
-app.get('/emails/:path', function (req, res) {
+app.get('/lastEmails/:path', function (req, res) {
    var conn = sessions[req.get('Authorization')];
-   if (req.query.afterUid !== undefined) {
-        conn.getEmailsAfterUid(req.params.path, req.query.afterUid, onEmailsSuccess, onEmailsError);
-   } else {
-        conn.getEmails(req.params.path, req.query.offset, req.query.count, onEmailsSuccess, onEmailsError);
-   }
+   conn.getLastEmails(req.params.path, req.query.count, req.query.lastDate ? new Date(req.query.lastDate) : null, onEmailsSuccess, onEmailsError);
    function onEmailsSuccess(emails) {
         res.writeHead(200, {'Content-Type': 'application/json'}); 
         res.end(JSON.stringify(emails));
@@ -68,11 +64,33 @@ app.get('/emails/:path', function (req, res) {
 		res.end(JSON.stringify(error));
    }
 });
-app.get('/emailbody/:path/:uid', function (req, res) {
+app.get('/newEmails/:path', function (req, res) {
    var conn = sessions[req.get('Authorization')];
-   conn.getEmailBody(req.params.uid, req.params.path, function(body){
+   conn.getNewEmails(req.params.path, new Date(req.query.firstDate), onEmailsSuccess, onEmailsError);
+   function onEmailsSuccess(emails) {
+        res.writeHead(200, {'Content-Type': 'application/json'}); 
+        res.end(JSON.stringify(emails));
+   }
+   function onEmailsError(error) {
+		res.writeHead(500, {'Content-Type': 'application/json'}); 
+		res.end(JSON.stringify(error));
+   }
+});
+app.post('/reademail/:path/:uid', function (req, res) {
+   var conn = sessions[req.get('Authorization')];
+   conn.setEmailRead(req.params.path, req.params.uid, function(){
 		res.writeHead(200, {'Content-Type': 'application/json'}); 
-		res.end(JSON.stringify(body));
+		res.end("");
+   }, function(error){
+		res.writeHead(500, {'Content-Type': 'application/json'}); 
+		res.end(JSON.stringify(error));
+   });
+});
+app.get('/attachment/:path/:uid/:part', function (req, res) {
+   var conn = sessions[req.get('Authorization')];
+   conn.getEmailAttachment(req.params.path, req.params.uid, req.params.part, function(data){
+		res.writeHead(200, {'Content-Type': 'application/json'}); 
+		res.end(JSON.stringify(data));
    }, function(error){
 		res.writeHead(500, {'Content-Type': 'application/json'}); 
 		res.end(JSON.stringify(error));
@@ -89,7 +107,7 @@ app.post('/send', function (req, res) {
    });
 });
 
-var server = app.listen(env.NODE_PORT || 80, env.NODE_IP || 'localhost', function () {
+var server = app.listen(env.NODE_PORT || 80, env.NODE_IP || '0.0.0.0', function () {
   var host = server.address().address;
   var port = server.address().port;
   console.log("Email app listening at http://%s:%s", host, port);
