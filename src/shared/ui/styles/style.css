@@ -157,3 +157,14 @@ md-content {
 .email-header p.email-header-subject {
     font-size: 20px;
 }
+.btn-attachment {
+    color: black;
+    text-decoration: none;
+}
+.btn-attachment:hover {
+    text-decoration: underline;
+}
+.email-header md-progress-linear {
+    width: 100%;
+    margin-bottom: -5px !important;
+}

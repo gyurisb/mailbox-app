@@ -2,6 +2,7 @@
 
 require('./main/mailbox_server.js')
 const electron = require('electron');
+const open = require("open");
 // Module to control application life.
 const app = electron.app;
 const ipcMain = electron.ipcMain;
@@ -53,7 +54,8 @@ app.on('activate', function () {
   }
 });
 
-ipcMain.on('openNewEmailWindow', function(event, arg) {
+ipcMain.on('openNewEmailWindow', function(event, params) {
+  global.newEmailParams = JSON.stringify(params);
   var newWindow = new BrowserWindow({width: 1024, height: 768});
   createDebugMenu(newWindow);
   newWindow.loadURL('file://' + __dirname + '/renderer/new.html');
@@ -69,6 +71,21 @@ ipcMain.on('openNewLoginDialog', function(event, arg) {
 });
 
 ipcMain.on('closeWindow', function(event, arg) {
+});
+
+ipcMain.on('openLink', function(event, href) {
+  open(href);
+});
+
+ipcMain.on('openContextMenu', function(event, arg){
+    var template = arg.menu;
+    template.forEach(function(menu, index){
+        menu.click = function() {
+            event.sender.send('contextMenuClick', { id: arg.id, menuId: index });
+        }
+    });
+    var contextMenu = Menu.buildFromTemplate(template);
+    contextMenu.popup(event.sender);
 });
 
 function createDebugMenu(newWindow) {

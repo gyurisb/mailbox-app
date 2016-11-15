@@ -1,37 +1,63 @@
-ngApp.factory('$app', ['$master',
-    function($master) {
-        var folderFocusedCallback;
-        var emailFocusedCallback;
-        var restoreCallback;
-        var restoreCallback2;
+ngApp.factory('$app', ['$master', '$rootScope',
+    function($master, $rootScope) {
+        var folderFocusedCallbacks = [];
+        var emailFocusedCallbacks = [];
+        var restoredCallbacks = [];
+        var emailModifiedCallbacks = [];
+        var emailParametersCallbacks = [];
         
         return {
             onRestore: function(callback) {
-                restoreCallback = callback;
-            },
-            secondaryOnRestore: function(callback) {
-                restoreCallback2 = callback;
+                restoredCallbacks.push(callback);
             },
             onFolderFocus: function(callback) {
-                folderFocusedCallback = callback;
+                folderFocusedCallbacks.push(callback);
             },
             onEmailFocus: function(callback) {
-                emailFocusedCallback = callback;
+                emailFocusedCallbacks.push(callback);
+            },
+            onEmailModify: function(callback) {
+                emailModifiedCallbacks.push(callback);
+            },
+            onEmailParameters: function(callback) {
+                if (platform == 'desktop') {
+                    callback(JSON.parse(remote.getGlobal('newEmailParams')));
+                } else {
+                    emailParametersCallbacks.push(callback);
+                }
             },
             restore: function() {
-                restoreCallback();
-                restoreCallback2();
+                restoredCallbacks.forEach(function(callback){
+                    callback();
+                });
             },
-            focusFolder: function(folder) {
-                folderFocusedCallback(folder.path);
+            focusFolder: function(path) {
+                folderFocusedCallbacks.forEach(function(callback){
+                    callback(path);
+                });
             },
-            focusEmail: function(uid, path) {
-                emailFocusedCallback(uid, path);
+            focusEmail: function(email) {
+                emailFocusedCallbacks.forEach(function(callback){
+                    callback(email);
+                });
             },
-            newEmail: function() {
+            modifyEmail: function(path, uid) {
+                emailModifiedCallbacks.forEach(function(callback){
+                    callback(path, uid);
+                });
+            },
+            closeEmail: function() {
+                if (platform == 'mobile' && $master.isFocused(2)) {
+                    window.history.back();
+                }
+            },
+            newEmail: function(params) {
                 if (platform == 'desktop') {
-                    ipcRenderer.send('openNewEmailWindow');
+                    ipcRenderer.send('openNewEmailWindow', params || {});
                 } else if (platform == 'mobile') {
+                    emailParametersCallbacks.forEach(function(callback){
+                        callback(params || {});
+                    });
                     $master.focus(4);
                 }
             },
@@ -56,6 +82,37 @@ ngApp.factory('$app', ['$master',
                     window.history.back();
                 }
             },
+            openLink: function(href) {
+                if (platform == 'desktop') {
+                    ipcRenderer.send('openLink', href);
+                }
+            },
+            showSaveDialog: function(defaultPath, success, error) {
+                if (platform == "desktop") {
+                    dialog.showSaveDialog({ defaultPath: defaultPath, title: "Save attachment" }, function(fileName){
+                        $rootScope.$apply(function(){
+                            if (fileName !== undefined) {
+                                    success(fileName);
+                            } else {
+                                error();
+                            }
+                        });
+                    });
+                }
+            },
+            showOpenDialog: function(success, error) {
+                if (platform == "desktop") {
+                    dialog.showOpenDialog({ title: "Attach a file", properties: ['openFile', 'multiSelections'] }, function(files){
+                        $rootScope.$apply(function(){
+                            if (files && files.length > 0) {
+                                success(files.map(function(file) { return { name: path.basename(file), path: file, size: fs.statSync(file).size }; }));
+                            } else {
+                                error();
+                            }
+                        });
+                    });
+                }
+            }
         };
     }
 ]);

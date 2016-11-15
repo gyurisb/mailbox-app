@@ -12,6 +12,9 @@
         const ipcRenderer = require('electron').ipcRenderer;
         const $ = require('jQuery');
         const remote = require('remote');
+        const dialog = remote.require('dialog');
+        const path = require('path');
+        const fs = require('fs');
     </script>
     <!--<script src="lib/angular/angular.min.js"></script>
     <script src="lib/angular/angular-aria.min.js"></script>
@@ -24,6 +27,7 @@
     <script src="js/master.service.js"></script>
     <script src="js/app.service.js"></script>
     <script src="js/mailbox.service.js"></script>
+    <script src="js/contextMenu.directive.js"></script>
     <script src="controllers/main.js"></script>
     <script src="controllers/folder.js"></script>
     <script src="controllers/folders.js"></script>

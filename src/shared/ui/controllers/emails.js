@@ -5,6 +5,7 @@ ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '
     $scope.emails = [];
     $scope.hasNextPage = false;
     $scope.selectedEmail = null;
+    $scope.selectedPath = null;
     
     function loadEmails(currentPath) {
         $mailbox.getEmails(currentPath || $scope.path, $scope.page*$scope.itemCount, $scope.itemCount + 1).success(function(emails){
@@ -19,7 +20,7 @@ ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '
         });
     }
     
-    $app.secondaryOnRestore(function(){
+    $app.onRestore(function(){
         if (platform == 'desktop') {
             loadEmails('Inbox');
         }
@@ -32,9 +33,32 @@ ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '
         }
     });
     
-    $mailbox.onFolderUpdate().success(function(folder){
+    $mailbox.onFolderUpdate(function(folder){
         if (folder.path == $scope.path && $master.isFocused(1)) {
             loadEmails();
+        }
+    });
+
+    $app.onEmailModify(function(path, uid){
+        if (path == $scope.path && uid == $scope.selectedEmail) {
+            $scope.selectedEmail = null;
+            $scope.selectedPath = null;
+        }
+    });
+
+    $mailbox.onEmailUpdate(function(evt){
+        if (evt.oldPath == $scope.selectedPath && evt.oldUid == $scope.selectedEmail) {
+            $scope.selectedEmail = evt.newUid;
+            $scope.selectedPath = evt.newPath;
+        }
+    });
+
+    $mailbox.onFolderPathUpdate(function(evt){
+        if (evt.oldPath == $scope.path || $scope.path.indexOf(evt.oldPath + evt.delimiter) == 0) {
+            $scope.path = evt.newPath ? $scope.path.replace(evt.oldPath, evt.newPath) : null;
+        }
+        if (evt.oldPath == $scope.selectedPath || $scope.selectedPath.indexOf(evt.oldPath + evt.delimiter) == 0) {
+            $scope.selectedPath = evt.newPath ? $scope.selectedPath.replace(evt.oldPath, evt.newPath) : null;
         }
     });
     
@@ -50,7 +74,8 @@ ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '
     
     $scope.emailClicked = function(email){
         $scope.selectedEmail = email.uid;
-        $app.focusEmail(email, $scope.path);
+        $scope.selectedPath = $scope.path;
+        $app.focusEmail(email);
     }
     
     $scope.formatEmailDate = function(dateString) {

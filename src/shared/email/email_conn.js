@@ -1,11 +1,14 @@
 const BrowserBox = require('browserbox');
 const SmtpClient = require('wo-smtpclient');
 const MimeParser = require('emailjs-mime-parser');
+const MimeBuilder = require('emailjs-mime-builder');
 const semaphore = require('semaphore');
+const utf7 = require('wo-utf7');
 
 module.exports = EmailConnection;
 
 function EmailConnection() {
+	var conn;
 	var imap;
 	var imapLock = semaphore(1);
 	var sender;
@@ -13,7 +16,7 @@ function EmailConnection() {
 	var smtpHost;
 	var smtpPort;
 	var selectedFolder;
-	return {
+	return conn = {
 		login: function(arg, success, error) {
 			imapLock.take(function() {
 				imap = new BrowserBox(arg.imapHost, arg.imapPort, {
@@ -53,14 +56,62 @@ function EmailConnection() {
 						error(err);
 					}
 					else {
+						convertMailbox(mailboxes);
 						success(mailboxes);
+						function convertMailbox(mailbox) {
+							if (mailbox.path) {
+								mailbox.path = utf7.imap.decode(mailbox.path);
+							}
+							if (mailbox.children) {
+								mailbox.children.forEach(convertMailbox);
+							}
+						}
 					}
 				});
 			});
 		},
-		getLastEmails: function(path, count, lastDate, success, error) {
+		createFolder: function(path, success, error) {
 			imapLock.take(function() {
-				imap.selectMailbox(path || 'Inbox', function(err, mailbox){
+				imap.createMailbox(path, function(err, alreadyExists){
+					imapLock.leave();
+					if (!err && !alreadyExists) {
+						success();
+					} else {
+						error(err || alreadyExists);
+					}
+				});
+			});
+		},
+		deleteFolder: function(path, success, error) {
+			imapLock.take(function() {
+				imap.exec({ command: 'DELETE', attributes: [utf7.imap.encode(path)] }, function(err, response, next) {
+					imapLock.leave();
+					if (err) {
+						error(err);
+					} else {
+						success();
+					}
+					next();
+				});
+			});
+		},
+		moveFolder: function(path, targetPath, success, error) {
+			imapLock.take(function() {
+				imap.exec({ command: 'RENAME', attributes: [utf7.imap.encode(path), utf7.imap.encode(targetPath)] }, function(err, response, next) {
+					imapLock.leave();
+					if (err) {
+						error(err);
+					} else {
+						success();
+					}
+					next();
+				});
+			});
+		},
+		getLastEmails: function(path, count, lastDate, success, error) {
+			lastDate = lastDate ? new Date(lastDate.toString()) : null;
+			imapLock.take(function() {
+				imap.selectMailbox(utf7.imap.encode(path) || 'Inbox', function(err, mailbox){
 					if (err !== undefined && err !== null) {
 						imapLock.leave();
 						error(err);
@@ -70,15 +121,14 @@ function EmailConnection() {
 							var intervals = getIntervals(sids);
 							getEmailsByIntervals(intervals, function(messages){
 								imapLock.leave();
-								messages.sort(function(a, b){
-									return new Date(b.envelope.date).valueOf() - new Date(a.envelope.date).valueOf();
-								});
+								messages.sort((a, b) => new Date(b.envelope.date).valueOf() - new Date(a.envelope.date).valueOf());
 								if (lastDate) {
-									messages = messages.filter(function(msg){
-										return new Date(msg.envelope.date) <= lastDate;
-									});
+									messages = messages.filter(msg => new Date(msg.envelope.date) <= lastDate);
 								}
-								success({ messages: messages.slice(0, count).map(parseMessage), hasMore: hasMore && count != mailbox.exists });
+								if (count >= 0) {
+									messages = messages.slice(0, count);
+								}
+								success({ messages: messages.map(parseMessage), hasMore: hasMore && count != mailbox.exists });
 							}, error);
 						}, error);
 					}
@@ -86,9 +136,9 @@ function EmailConnection() {
 			});
 		},
 		getNewEmails: function(path, firstDate, success, error) {
-			path = path || 'Inbox';
+			firstDate = new Date(firstDate.toString());
 			imapLock.take(function() {
-				imap.selectMailbox(path, function(err, mailbox){
+				imap.selectMailbox(utf7.imap.encode(path) || 'Inbox', function(err, mailbox){
 					if (err !== undefined && err !== null) {
 						imapLock.leave();
 						error(err);
@@ -105,7 +155,7 @@ function EmailConnection() {
 									var intervals = getIntervals(sids);
 									getEmailsByIntervals(intervals, function(messages){
 										imapLock.leave();
-										success(messages.filter(function(msg) { return new Date(msg.envelope.date) >= firstDate }).map(parseMessage));
+										success(messages.filter(msg => new Date(msg.envelope.date) >= firstDate).map(parseMessage));
 									}, error);
 								}
 							});
@@ -116,22 +166,7 @@ function EmailConnection() {
 		},
 		setEmailRead: function(path, uid, success, error) {
 			imapLock.take(function() {
-				if (selectedFolder != path) {
-					imap.selectMailbox(path, function(err, mailbox){
-						if (err !== undefined && err !== null) {
-							imapLock.leave();
-							error(err);
-						}
-						else {
-							selectedFolder = path;
-							setEmailRead();
-						}
-					});
-				} else {
-					setEmailRead();
-				}
-				
-				function setEmailRead() {
+				selectMailbox(utf7.imap.encode(path), function(){
 					imap.setFlags(uid + ':' + uid, { add: ['\\Seen'] }, { byUid: true }, function(err, result) {
 						imapLock.leave();
 						if (err !== undefined && err !== null) {
@@ -141,27 +176,15 @@ function EmailConnection() {
 							success();
 						}
 					});
-				}
+				}, function(err){
+					imapLock.leave();
+					error(err);
+				});
 			});
 		},
 		getEmailAttachment: function(path, uid, part, success, error) {
 			imapLock.take(function() {
-				if (selectedFolder != path) {
-					imap.selectMailbox(path, function(err, mailbox){
-						if (err !== undefined && err !== null) {
-							imapLock.leave();
-							error(err);
-						}
-						else {
-							selectedFolder = path;
-							getEmailAttachment();
-						}
-					});
-				} else {
-					getEmailAttachment();
-				}
-				
-				function getEmailAttachment() {
+				selectMailbox(utf7.imap.encode(path), function(){
 					imap.listMessages(uid + ':' + uid, ['body['+part+']'], { byUid: true }, function(err, messages) {
 						imapLock.leave();
 						if (err !== undefined && err !== null) {
@@ -169,64 +192,113 @@ function EmailConnection() {
 						}
 						else {
 							var body = messages[0]['body['+part+']'];
-							var parser = new MimeParser();
-							var attachment;
-							parser.onheader = function(node) {};
-							parser.onbody = function(node, chunk){
-								attachment = {
-									contentType: node.headers['content-type'][0].value,
-									fileName: node.headers['content-disposition'][0].params.filename,
-									size: node.headers['content-disposition'][0].params.size,
-									chunk: chunk
-								};
-							};
-							parser.onend = function(){
-								var base64Data = btoa(String.fromCharCode.apply(null, attachment.chunk));
-								success(base64Data);
-							};
-							parser.write(body);
-							parser.end();
+							var content = body.replace('\r\n', '');
+							success(content);
 						}
 					});
-				}
+				}, function(err){
+					imapLock.leave();
+					error(err);
+				});
 			});
 		},
-		sendEmail: function(arg, success, error) {
-			var alreadySending = false;
-			var client = new SmtpClient(smtpHost, smtpPort, {
-				//useSecureTransport: true,
-				name: sender,
-				auth: {
-					user: sender,
-					pass: password
-				}
-			});
-			client.onidle = function(){
-				if(alreadySending){
-					return;
-				}
-				alreadySending = true;
-				client.useEnvelope({
-					from: sender,
-					to: arg.to
+		deleteEmail: function(path, uid, success, error) {
+			imapLock.take(function(){
+				selectMailbox(utf7.imap.encode(path), function(){
+					imap.deleteMessages(uid + ':' + uid, { byUid: true }, function(err) {
+						imapLock.leave();
+						if (err) {
+							error(err);
+						} else {
+							success();
+						}
+					});
+				}, function(err){
+					imapLock.leave();
+					error(err);
 				});
-			};
-			client.onready = function(failedRecipients){
-				if(failedRecipients.length){
-					error("The following addresses were rejected: " + failedRecipients.join());
-				}
-				else {
-					client.send("Subject: " + arg.subject + "\r\n");
-					client.send("\r\n");
-					client.send(arg.body);
-					client.end();
+			});
+		},
+		moveEmail: function(path, uid, targetPath, success, error) {
+			imapLock.take(function(){
+				selectMailbox(utf7.imap.encode(path), function(){
+					imap.moveMessages(uid + ':' + uid, utf7.imap.encode(targetPath), { byUid: true }, function(err) {
+						imapLock.leave();
+						if (err) {
+							error(err);
+						} else {
+							success();
+						}
+					});
+				}, function(err){
+					imapLock.leave();
+					error(err);
+				});
+			});
+		},
+		sendEmail: function(message, success, error) {
+			downloadAttachments(0, function(){
+				var alreadySending = false;
+				var client = new SmtpClient(smtpHost, smtpPort, {
+					//useSecureTransport: true,
+					name: sender,
+					auth: {
+						user: sender,
+						pass: password
+					}
+				});
+				client.onidle = function(){
+					if(alreadySending){
+						return;
+					}
+					alreadySending = true;
+					client.useEnvelope({
+						from: sender,
+						to: message.to.concat(message.bcc)
+					});
+				};
+				client.onready = function(failedRecipients){
+					if(failedRecipients.length){
+						error({ type: "rejectedAddresses", message: "The following addresses were rejected: " + failedRecipients.join(), failedRecipients: failedRecipients });
+					}
+					else {
+						var root = new MimeBuilder("multipart/mixed");
+						root.setHeader("Subject", message.subject);
+						root.setHeader("To", message.to.join(", "));
+						root.setHeader("Bcc", message.bcc.join(", "));
+						if (message.replyTo) {
+							root.setHeader("In-Reply-To", message.replyTo.messageId);
+							root.setHeader("References", message.replyTo.refs + " " + message.replyTo.messageId);
+						}
+						var textChild = root.createChild('text/html');
+						textChild.setContent(message.body);
+						message.attachments.forEach(function(attachment){
+							var child = root.createChild(false, { filename: attachment.name });
+							child.setHeader("Content-Disposition", "attachment");
+							child.setContent(new Buffer(attachment.data, "base64"));
+						});
+						client.send(root.build())
+						client.end();
+						success();
+					}
+				};
+				client.onerror = function(err) {
+					error(err);
+				};
+				client.connect();
+			}, error);
+			function downloadAttachments(i, success, error) {
+				var onlineAttachments = message.attachments.filter(a => a.type == "part");
+				if (i >= onlineAttachments.length){
 					success();
+				} else {
+					var attachment = onlineAttachments[i];
+					conn.getEmailAttachment(message.path, message.uid, attachment.part, function(data){
+						attachment.data = data;
+						downloadAttachments(i + 1, success, error);
+					}, error);
 				}
-			};
-			client.onerror = function(err) {
-				error(err);
-			};
-			client.connect();
+			}
 		},
 		close() {
 			imap.close();
@@ -236,13 +308,32 @@ function EmailConnection() {
 		}
 	}
 
+	function selectMailbox(path, success, error) {
+		if (selectedFolder != path) {
+			imap.selectMailbox(path, function(err, mailbox){
+				if (err) {
+					error(err);
+				} else {
+					selectedFolder = path;
+					success();
+				}
+			});
+		} else {
+			success();
+		}
+	}
+
 	function searchEmails(count, dateBefore, success, error) {
 		imap.search({ on: dateBefore }, {}, function(err, ssidsOnDate){
 			if (err !== undefined && err !== null) {
 				imapLock.leave();
 				error(err);
 			} else {
-				searchOldEmails(count + ssidsOnDate.length, dateBefore, addDays(dateBefore, -7), ssidsOnDate, success, error);
+				if (count > 0) {
+					searchOldEmails(count + ssidsOnDate.length, dateBefore, addDays(dateBefore, -7), ssidsOnDate, success, error);
+				} else {
+					success(ssidsOnDate, true);
+				}
 			}
 		});
 	}
@@ -273,7 +364,7 @@ function EmailConnection() {
 		if (uids.length == 0) {
 			success(result);
 		} else {
-			imap.listMessages(uids[0], ['uid', 'flags', 'envelope', 'bodystructure', 'body.peek[text]'], {}, function(err, messages){
+			imap.listMessages(uids[0], ['uid', 'flags', 'envelope', 'bodystructure', 'body.peek[header]', 'body.peek[text]'], {}, function(err, messages){
 				if (err !== undefined && err !== null) {
 					imapLock.leave();
 					error(err);
@@ -288,7 +379,7 @@ function EmailConnection() {
 		if (sids.length == 0) {
 			return [];
 		} else {
-			sids.sort(function(a, b) { return a - b; });
+			sids.sort((a, b) => a - b);
 			var intervals = [];
 			var begin = sids[0];
 			for (var i = 1; i < sids.length; i++) {
@@ -303,54 +394,35 @@ function EmailConnection() {
 	}
 
 	function parseMessage(message) {
-		var body = message['body[text]'];
-		message['body[text]'] = undefined;
-		message.text = body;
+		message.text = message['body[text]'];
 		message.contentType = message.bodystructure.type;
-		if (message.bodystructure.type == 'text/html' || message.bodystructure.type == 'text/plain') {
+		if (message.contentType == 'text/html' || message.contentType == 'text/plain') {
 			if (message.bodystructure.encoding == 'quoted-printable') {
-				message.text = quoted_printable_decode(body);
+				message.text = quoted_printable_decode(message.text);
 			}
 		} else {
-			var bodies = [body];
-			if (message.bodystructure.parameters && message.bodystructure.parameters.boundary) {
-				var data = body.split(message.bodystructure.parameters.boundary);
-				bodies = data.slice(1, data.length - 1).map(function(p){ return data[0] + p });
-			}
 			var parts = [];
-			bodies.forEach(function(body){
-				var parser = new MimeParser();
-				parser.onheader = function(node) {};
-				parser.onbody = function(node, chunk){
-					parts.push({
-						contentType: node.headers['content-type'][0].value,
-						charset: node.charset,
-						chunk: chunk
-					});
-				};
-				parser.onend = function(){};
-				parser.write(body);
-				parser.end();
-			});
-			var part = null;
-			part = first(parts, function(e){ return e.contentType == 'text/html' && e.charset == 'utf-8'; });
-			if (part == null)
-				part = first(parts, function(e){ return e.contentType == 'text/plain' && e.charset == 'utf-8'; });
+			var parser = new MimeParser();
+			parser.onheader = function(node) {};
+			parser.onbody = function(node, chunk){
+				parts.push({
+					contentType: node.headers['content-type'][0].value,
+					charset: node.charset,
+					chunk: chunk
+				});
+			};
+			parser.onend = function(){};
+			parser.write(message['body[header]'] + message['body[text]']);
+			parser.end();
+			var part = parts.filter(e => e.contentType == 'text/html' && e.charset == 'utf-8')[0] || parts.filter(e => e.contentType == 'text/plain' && e.charset == 'utf-8')[0];
 			if (part != null) {
 				message.text = Utf8ArrayToStr(part.chunk);
 				message.contentType = part.contentType;
 			}
 		}
+		message['body[text]'] = undefined;
 		return message;
 	}
-}
-
-function first(array, func) {
-    for (var i = 0; i < array.length; i++) {
-       if (func(array[i]))
-            return array[i]; 
-    };
-    return null;
 }
 
 function addDays(date, days) {

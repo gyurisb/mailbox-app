@@ -1,32 +1,21 @@
 // var backendHostName = "https://email-globaltransit.rhcloud.com";
-var backendHostName = "http://192.168.0.11";
+var backendHostName = "http://192.168.0.15";
 
 function EmailConnectionProxy() {
     var token;
-    return {
-        login: function(args, success, error) {
-            request('POST', 'login', args, true).success(success).error(error);
-        },
-        getFolders: function(success, error) {
-            request('GET', 'folders').success(success).error(error);
-        },
-		getLastEmails: function(path, count, lastDate, success, error) {
-            request('GET', 'lastEmails/' + encodeURIComponent(path) + "?count=" + count + (lastDate ? "&lastDate=" + encodeURIComponent(lastDate.toISOString()) : "")).success(success).error(error);
-        },
-		getNewEmails: function(path, firstDate, success, error) {
-            request('GET', 'newEmails/' + encodeURIComponent(path) + "?firstDate=" + encodeURIComponent(firstDate.toISOString())).success(success).error(error);
-        },
-		setEmailRead: function(path, uid, success, error) {
-            request('POST', 'reademail/' + encodeURIComponent(path) + '/' + uid).success(success).error(error);
-        },
-		getEmailAttachment: function(path, uid, part, success, error) {
-            request('GET', 'attachment/' + encodeURIComponent(path) + '/' + uid + '/' + part).success(success).error(error);
-        },
-        sendEmail: function(args, success, error) {
-            request('POST', 'send', args).success(success).error(error);
-        },
-        onError: function(callback) {}
-    };
+
+    var proxy = {};
+    Generated.emailActions.forEach(function(action){
+        proxy[action] = function() {
+            var args = Array.prototype.slice.call(arguments);
+            var params = args.slice(0, -2);
+            var success = args.slice(-2)[0];
+            var error = args.slice(-1)[0];
+            request('POST', action, params, action == "login").success(success).error(error);
+        }
+    });
+    return proxy;
+
     function request(method, action, data, saveToken) {
         var future = {
             success: function(callback) {

@@ -3,7 +3,9 @@ var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 var del = require('del');
-//gulp-clean |gulp-del
+var file = require('gulp-file');
+var sourcemaps = require('gulp-sourcemaps');
+var EmailConnection = require('./src/shared/email/email_conn.js');
 
 gulp.task('clean', function() {
     del(['dist/**/*',   
@@ -33,7 +35,13 @@ gulp.task('build', function() {
         .pipe(gulp.dest('dist/mobile/cordova/www/js'));
     gulp.src('src/shared/ui/**/*')
         .pipe(gulp.dest('dist/desktop/renderer'))
+        .pipe(file('generated.js', getGeneratedFile()))
         .pipe(gulp.dest('dist/mobile/cordova/www'));
+
+    function getGeneratedFile() {
+        var emailActions = Object.keys(new EmailConnection());
+        return "var Generated = { emailActions: [" +  emailActions.map(a => '"' + a + '"').join(',') + "] };";
+    }
         
     /* source: http://andy-carter.com/blog/a-beginners-guide-to-the-task-runner-gulp */
     // return gulp.src('src/js/*.js')

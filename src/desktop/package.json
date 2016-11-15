@@ -28,10 +28,11 @@
     "cordova": "6.0.0",
     "electron-prebuilt": "^0.36.0",
     "jquery": "2.2.0",
-    "mailbuild": "0.3.7",
-    "mimeparser": "0.3.8",
     "emailjs-mime-parser": "1.0.0",
-    "wo-smtpclient": "0.6.1"
+    "emailjs-mime-builder": "1.0.1",
+    "wo-smtpclient": "0.6.1",
+    "wo-utf7": "2.0.2",
+    "open": "0.0.5"
   },
   "dependencies": {
     "angular-animate": "^1.5.0",

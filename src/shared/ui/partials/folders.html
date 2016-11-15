@@ -1,22 +1,18 @@
 <div ng-controller="FoldersController" class="folders">
-    <md-menu class="account-label">
-        <span ng-click="$mdOpenMenu($event)">{{emailAddress}}</span>
-        <md-menu-content width="4">
-            <md-menu-item>
-                <md-button>{{emailAddress}}</md-button>
-            </md-menu-item>
-            <md-menu-divider></md-menu-divider>
-            <md-menu-item>
-                <md-button ng-click="editAccount()">Account settings</md-button>
-            </md-menu-item>
-            <md-menu-item>
-                <md-button ng-click="logout()">Logout</md-button>
-            </md-menu-item>
-        </md-menu-content>
-    </md-menu>
+    <div ng-drop="dropFolderOnRoot($data)">
+        <div context-menu="accountMenu">
+            <md-menu class="account-label">
+                <span>{{emailAddress}}</span>
+                <md-menu-content width="4" hidden></md-menu-content>
+            </md-menu>
+        </div>
+    </div>
     <div class="folders-flex">
         <div class="folders-container">
-            <folder ng-repeat="folder in root.children" model="folder" selected-folder="selectedFolder" folder-clicked="folderClicked">
+            <form ng-if="new" ng-submit="newFolder()" class="new-folder-form">
+                <input type="text" ng-model="new.name" auto-focus ng-blur="newFolder()" class="edit-folder-control">
+            </form>
+            <folder ng-repeat="folder in root.children" model="folder" selected="selected" states="folderStates">
             </folder>
         </div>
     </div>

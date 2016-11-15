@@ -1,69 +1,41 @@
 ngApp.factory('$mailbox', ['$timeout',
     function($timeout) {
-        var mailbox = new Mailbox(new SQLitePluginSubsystem('mailbox.db'), EmailConnectionProxy, EmailStore);
-        return {
-            login: function(args) {
-                var p = angularPromise();
-                mailbox.login(args, p.performSuccess, p.performError);
-                return p.future;
-            },
-            restore: function() {
-                var p = angularPromise();
-                mailbox.restore(p.performSuccess, p.performError);
-                return p.future;
-            },
-            getFolders: function() {
-                var p = angularPromise();
-                mailbox.getFolders(p.performSuccess, p.performError);
-                return p.future;
-            },
-            getEmails: function(path, offset, count) {
-                var p = angularPromise();
-                mailbox.getEmails({ path: path, offset: offset, count: count }, p.performSuccess, p.performError);
-                return p.future;
-            },
-            getEmailBody: function(path, uid, seen) {
-                var p = angularPromise();
-                mailbox.getEmailBody({ uid: uid, path: path, seen: seen }, p.performSuccess, p.performError);
-                return p.future;
-            },
-            sendEmail: function(args) {
-                var p = angularPromise();
-                mailbox.sendEmail(args, p.performSuccess, p.performError);
-                return p.future;
-            },
-            contacts: function(key) {
-                var p = angularPromise();
-                mailbox.contacts(key, p.performSuccess);
-                return p.future;
-            },
-            onFolderUpdate: function() {
-                var p = angularPromise();
-                mailbox.onFolderUpdate(p.performSuccess);
-                return p.future;
-            },
-            onMailboxUpdate: function() {
-                var p = angularPromise();
-                mailbox.onMailboxUpdate(p.performSuccess);
-                return p.future;
-            },
-            onAccountUpdate: function() {
-                var p = angularPromise();
-                mailbox.onAccountUpdate(p.performSuccess);
-                return p.future;
-            },
-            onError: function(callback) {}
-        };
+        var mailbox = new Mailbox(SQLitePluginSubsystem, Object, EmailConnectionProxy, EmailStore);
+        var service = {};
+        Object.keys(mailbox).forEach(function(action){
+            if (action.substr(0, 2) == "on") {
+                var eventHandlers = [];
+                mailbox[action](function(eventParams){
+                    $timeout(function() {
+                        eventHandlers.forEach(function(eventCallback){
+                            eventCallback(eventParams);
+                        });
+                    },0);
+                });
+                service[action] = function(eventCallback) {
+                    eventHandlers.push(eventCallback);
+                }
+            } else {
+                service[action] = function() {
+                    var promise = angularPromise();
+                    mailbox[action].apply(mailbox, Array.prototype.slice.call(arguments).concat([promise.performSuccess, promise.performError]));
+                    return promise.future;
+                }
+            }
+        });
+        return service;
         function angularPromise() {
             var successCallback = angular.noop;
             var errorCallback = angular.noop;
-            return {
+            var promise = {
                 future: {
                     success: function(callback) {
                         successCallback = callback;
+                        return promise.future;
                     },
                     error: function(callbac) {
                         errorCallback = callback;
+                        return promise.future;
                     }
                 },
                 performSuccess: function(res) {
@@ -77,6 +49,7 @@ ngApp.factory('$mailbox', ['$timeout',
                     },0);
                 }
             };
+            return promise;
         }
     }
 ]);

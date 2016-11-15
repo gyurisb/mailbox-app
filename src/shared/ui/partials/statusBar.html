@@ -4,6 +4,12 @@
     <span ng-if="phase == 'folders'">Syncing folders</span>
     <span ng-if="phase == 'emails'">Syncing messages</span>
     <span ng-if="phase == 'done'">Last sync: {{syncDate | date:'medium'}}</span>
-    <span ng-if="phase == 'error'">An error occured during the synchronization of the account.</span>
+    <span ng-if="phase == 'error'">An error occured during the synchronization of the account. Last sync: {{syncDate | date:'medium'}}</span>
+    <span ng-if="phase == 'commands'">
+        <span ng-if="command == 'setEmailRead'">Marking e-mail as read in progress.</span>
+        <span ng-if="command == 'sendEmail'">Sending emails in progress.</span>
+        <span ng-if="command == 'deleteEmail'">Deleting emails in progress.</span>
+        <span ng-if="command == 'moveEmail'">Moving emails in progress.</span>
+    </span>
     <md-progress-linear ng-if="progress != null" md-mode="{{progress >= 0 ? 'determinate' : 'indeterminate'}}" value="{{progress}}"></md-progress-linear>
 </div>

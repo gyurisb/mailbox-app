@@ -189,3 +189,12 @@ md-virtual-repeat-container {
     min-width: calc(100% - 10px) !important;
     max-width: calc(100% - 10px) !important;
 }
+.btn-bcc {
+    display: none !important;
+}
+.btn-attach {
+    display: none !important;
+}
+.new-attachment {
+    display: none;
+}

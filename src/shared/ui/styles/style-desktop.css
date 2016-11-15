@@ -123,6 +123,14 @@ reader {
     padding-left: 10px;
 }
 
+.edit-folder-control {
+    width: 150px;
+}
+.new-folder-form {
+    padding: 5px;
+    padding-left: 15px;
+}
+
 /* Email menu styles */
 .emails-nav {
     overflow: hidden;
@@ -192,4 +200,23 @@ md-virtual-repeat-container {
     width: 400px !important;
     min-width: 400px !important;
     max-width: 400px !important;
+}
+
+.chips-with-icon md-chips-wrap {
+    margin-right: -105px !important;
+    padding-right: 105px !important;
+}
+
+.new-attachment {
+    display: inline-block;
+    background: #E0E0E0;
+    padding: 5px 10px;
+    margin-right: 5px;
+    margin-top: 5px;
+    border-radius: 15px;
+}
+.new-attachment > button {
+    border: 0;
+    background-color: transparent;
+    color: #676767;
 }

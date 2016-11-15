@@ -9,7 +9,6 @@
             "args": [],
             "cwd": "${workspaceRoot}/dist/desktop/.",
             "runtimeExecutable": "${workspaceRoot}/dist/desktop/node_modules/electron-prebuilt/dist/electron.exe",
-            "runtimeArguments": [],
             "env": { },
             "sourceMaps": false
         },
@@ -23,5 +22,12 @@
 			"sourceMaps": true,
 			"cwd": "${workspaceRoot}/dist/mobile/cordova"
 		},
+		{
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Node.js server",
+            "program": "${workspaceRoot}/dist/mobile/server/app.js",
+			"sourceMaps": true
+        }
 	]
 }

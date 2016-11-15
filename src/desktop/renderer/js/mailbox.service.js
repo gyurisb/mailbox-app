@@ -1,74 +1,73 @@
-var mailboxServiceCount = 0;
 ngApp.factory('$mailbox', ['$timeout',
     function($timeout) {
-        mailboxServiceCount++;
-        var actions = ['login', 'restore', 'getFolders', 'getEmails', 'getEmailBody', 'sendEmail', 'contacts', 'onFolderUpdate', 'onMailboxUpdate', 'onAccountUpdate'];
+
+        var actions = remote.getGlobal('mailboxActions');
+        var nextRequestId = 0;
+
         var replyHandlers = {};
         var errorHandlers = {};
+        var eventHandlers = {};
         actions.forEach(function(action){
-            ipcRenderer.on(action + "Reply", function(event, result){
-                replyHandlers[action](result);
-            });
-            ipcRenderer.on(action + "Error", function(event, error){
-                errorHandlers[action](error);
-            });
-        });
-        
-        var errorHandler = function(){};
-        return {
-            login: function(args) {
-                return ipc('login', args);
-            },
-            restore: function() {
-                return ipc('restore');
-            },
-            getFolders: function() {
-                return ipc('getFolders');
-            },
-            getEmails: function(path, offset, count) {
-                return ipc('getEmails', { path: path, offset: offset, count: count });
-            },
-            getEmailBody: function(path, uid, seen) {
-                return ipc('getEmailBody', { uid: uid, path: path, seen: seen });
-            },
-            sendEmail: function(args) {
-                return ipc('sendEmail', args);
-            },
-            contacts: function(key) {
-                return ipc('contacts', key);
-            },
-            onFolderUpdate: function() {
-                return ipc('onFolderUpdate');
-            },
-            onMailboxUpdate: function() {
-                return ipc('onMailboxUpdate');
-            },
-            onAccountUpdate: function() {
-                return ipc('onAccountUpdate');
-            },
-            onError: function(handler) {
-                errorHandler = handler;
-            }
-        };
-        function ipc(action, data) {
-            var successCallback = function(x){};
-            var future = {
-                success: function(callback) {
-                    successCallback = callback;
+            replyHandlers[action] = {};
+            errorHandlers[action] = {};
+            if (action.startsWith("on")) {
+                ipcRenderer.on(action + "Triggered", function(event, eventParam){
+                    eventHandlers[action].forEach(function(eventCallback){
+                        eventCallback(eventParam);
+                    });
+                });
+            } else {
+                ipcRenderer.on(action + "Reply", function(event, reply){
+                    replyHandlers[action][reply.id](reply.result);
+                    deleteHandlers(reply.id);
+                });
+                ipcRenderer.on(action + "Error", function(event, reply){
+                    errorHandlers[action][reply.id](reply.error);
+                    deleteHandlers(reply.id);
+                });
+                function deleteHandlers(id) {
+                    delete replyHandlers[action][id];
+                    delete errorHandlers[action][id];
                 }
             }
-            replyHandlers[action] = function(result) {
-                $timeout(function() {
-                    successCallback(result);
-                },0);
-            };
-            errorHandlers[action] = function(error) {
-                $timeout(function() {
-                    errorHandler(error);
-                },0);
-            };
-            ipcRenderer.send(action + 'Async', data);
-            return future;
+        });
+        
+        var service = {};
+        actions.forEach(function(action){
+            if (action.startsWith("on")) {
+                eventHandlers[action] = [];
+                service[action] = function(eventCallback) {
+                    eventHandlers[action].push(angularCallback(eventCallback));
+                    ipcRenderer.send(action);
+                }
+            } else {
+                service[action] = function() {
+                    var requestId = nextRequestId++;
+                    ipcRenderer.send(action + 'Async', { id: requestId, params: Array.prototype.slice.call(arguments) });
+                    replyHandlers[action][requestId] = function(){};
+                    errorHandlers[action][requestId] = function(){};
+                    var future = {
+                        success: function(callback) {
+                            replyHandlers[action][requestId] = angularCallback(callback);
+                            return future;
+                        },
+                        error: function(callback) {
+                            errorHandlers[action][requestId] = angularCallback(callback);
+                            return future;
+                        }
+                    };
+                    return future;
+                }
+            }
+        });
+        return service;
+
+        function angularCallback(callback) {
+            return function(res) {
+                $timeout(function(){
+                    callback(res);
+                }, 0);
+            }
         }
     }
 ]);

@@ -6,7 +6,7 @@ ngApp.controller('MainController', ['$scope', '$app', '$master', '$mailbox', fun
     $scope.title = "Mailbox";
     $scope.folderInProgress = {};
 
-    $mailbox.onAccountUpdate().success(function(evt){
+    $mailbox.onAccountUpdate(function(evt){
         if (evt.type == "account") {
             if (evt.email) {
                 $scope.loggedIn = true;
@@ -19,13 +19,18 @@ ngApp.controller('MainController', ['$scope', '$app', '$master', '$mailbox', fun
         } else if (evt.type == "progress") {
             setPhase(evt.phase);
             $scope.progress = evt.progress;
-            if (evt.phase == "done") {
+            if (evt.phase == "commands") {
+                $scope.command = evt.command;
+            } else if (evt.phase == "done") {
                 $scope.syncDate = evt.syncDate;
             } else if (evt.phase == "error") {
                 $scope.errorMessage = JSON.stringify(evt.error);
+                $scope.syncDate = evt.syncDate;
             }
         } else if (evt.type == "folderProgress") {
             $scope.folderInProgress[evt.folder] = evt.progress;
+        } else if (evt.type == "rejectedAddresses") {
+            alert("Sending email failed. The following recepients were rejected: " + evt.failedRecipients.join("\n"));
         }
     });
 

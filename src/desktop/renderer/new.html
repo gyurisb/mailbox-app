@@ -9,7 +9,11 @@
         require('angular-animate');
         require('angular-material');
         const ipcRenderer = require('electron').ipcRenderer;
+        const $ = require('jQuery');
         const remote = require('remote');
+        const dialog = remote.require('dialog');
+        const path = require('path');
+        const fs = require('fs');
     </script>
     <script src="lib/jquery.min.js"></script>
     <script src="lib/tinymce/tinymce.min.js"></script>
