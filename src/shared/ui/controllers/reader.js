@@ -4,7 +4,7 @@ ngApp.controller('ReaderController', ['$scope', '$mailbox', '$app', '$master', '
 
     $app.onEmailFocus(function(email) {
         if (platform == "mobile" || email != $scope.email) {
-            $mailbox.getEmailBody(email.path, email.uid, email.seen).success(function(body){
+            $mailbox.getEmailBody(email.id).success(function(body){
                 $master.focus(2);
                 if (email.contentType == "text/plain") {
                     body = body.replace(/\n/g, '<br/>');
@@ -25,37 +25,19 @@ ngApp.controller('ReaderController', ['$scope', '$mailbox', '$app', '$master', '
         }
     });
 
-    $mailbox.onEmailUpdate(function(evt){
-        if (evt.oldPath == $scope.email.path && evt.oldUid == $scope.email.uid) {
-            $scope.email.path = evt.newPath;
-            $scope.email.uid = evt.newUid;
-        }
-    });
-
-    $mailbox.onFolderPathUpdate(function(evt){
-        if (evt.oldPath == $scope.email.path || $scope.email.path.indexOf(evt.oldPath + evt.delimiter) == 0) {
-            if (evt.newPath) {
-                $scope.email.path = $scope.email.path.replace(evt.oldPath, evt.newPath);
-            } else {
-                $scope.email = null;
-                $app.closeEmail();
-            }
-        }
-    });
-
-    $app.onEmailModify(function(path, uid) {
-        if (path == $scope.email.path && (uid == $scope.email.uid || uid == null)) {
+    $app.onEmailModify(function(emailId) {
+        if (emailId == $scope.email.id) {
             $scope.email = null;
             $app.closeEmail();
         }
     });
 
     $scope.download = function(attachment) {
-        $app.showSaveDialog(attachment.name, function(fileName){
-            var attachmentKey = attachment.part + '/' + attachment.uid + '/' + $scope.email.path;
+        $app.showSaveDialog(attachment.name, function(filePath){
+            var attachmentKey = attachment.part + '/' + $scope.email.id;
             downloadsInProgress[attachmentKey] = true;
             $scope.downloadInProgress = true;
-            $mailbox.getEmailAttachment($scope.email.path, $scope.email.uid, attachment.part, fileName).success(finishProgress).error(function(err){
+            $mailbox.getEmailAttachment($scope.email.id, attachment.part, filePath).success(finishProgress).error(function(err){
                 finishProgress();
                 alert("Error saving attachment:\n" + JSON.stringify(err))
             });
@@ -79,8 +61,8 @@ ngApp.controller('ReaderController', ['$scope', '$mailbox', '$app', '$master', '
     }
 
     $scope.delete = function() {
-        $mailbox.deleteEmail($scope.email.path, $scope.email.uid);
-        $app.modifyEmail($scope.email.path, $scope.email.uid);
+        $mailbox.deleteEmail($scope.email.id);
+        $app.modifyEmail($scope.email.id);
     }
 
     $scope.formatEmailDate = function(dateString) {

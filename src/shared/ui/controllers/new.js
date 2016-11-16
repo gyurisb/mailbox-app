@@ -1,5 +1,6 @@
 ngApp.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$timeout', '$app', function($scope, $mailbox, $master, $q, $timeout, $app) {
 
+    var replyToId = null;
     $scope.allowFormatting = (platform == "desktop");
     $scope.tinymceOptions = {
         onChange: function(e) {
@@ -23,7 +24,7 @@ ngApp.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$time
         $scope.message = { body: "" };
         $scope.attachments = [];
         if (params.replyTo) {
-            $scope.replyTo = params.replyTo;
+            replyToId = params.replyTo.id;
             if (params.forward) {
                 $scope.subject = "Fw: " + params.replyTo.subject.replace(/Re:(\s)*/, '').replace(/Fw:(\s)*/, '');
                 $scope.attachments = params.replyTo.attachments.map(function(attachment){ return { type: "part", part: attachment.part, name: attachment.name, size: attachment.size } });
@@ -69,9 +70,7 @@ ngApp.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$time
             subject: $scope.subject,
             body: body,
             attachments: $scope.attachments,
-            replyTo: $scope.replyTo,
-            uid: $scope.replyTo ? $scope.replyTo.uid : null,
-            path: $scope.replyTo ? $scope.replyTo.path : null
+            replyToId: replyToId
         });
         $app.sendEmail();
     }

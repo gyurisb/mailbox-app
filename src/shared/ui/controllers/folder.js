@@ -24,27 +24,23 @@ ngApp.directive('folder', ['$mailbox', '$app', function($mailbox, $app){
                return scope.folder.children.length * eHeight;
            }
            scope.selectFolder = function() {
-                scope.selected.path = scope.folder.path;
-                $app.focusFolder(scope.folder.path);
+                scope.selected.id = scope.folder.id;
+                $app.focusFolder(scope.folder);
            }
-           scope.drop = function(source) {
-                if (source.email != null && source.path != null) {
-                    if (source.path != scope.folder.path) {
-                        $mailbox.moveEmail(source.path, source.email.uid, scope.folder.path);
-                        $app.modifyEmail(source.path, source.email.uid);
-                    }
-                } else if (source.folder != null) {
-                    var sourceParentPath = source.folder.path.split(source.folder.delimiter).slice(0, -1).join(source.folder.delimiter);
-                    if (scope.folder.path.indexOf(source.folder.path) != 0 && sourceParentPath != scope.folder.path) {
-                        $mailbox.moveFolder(source.folder, scope.folder);
-                    }
+           scope.drop = function(dragged) {
+                if (dragged.email != null) {
+                    $mailbox.moveEmail(dragged.email.id, scope.folder.id).success(function(){
+                        $app.modifyEmail(dragged.email.id);
+                    });
+                } else if (dragged.folder != null) {
+                    $mailbox.moveFolder(dragged.folder.id, scope.folder.id);
                 }
            }
            scope.saveRename = function() {
                var rename = scope.state.rename;
                if (scope.state.rename.value && scope.state.rename.value.indexOf(scope.folder.delimiter) == -1) {
                     if (scope.state.rename.value != scope.folder.name) {
-                        $mailbox.renameFolder(scope.folder, scope.state.rename.value).success(function(){
+                        $mailbox.renameFolder(scope.folder.id, scope.state.rename.value).success(function(){
                             scope.folder.name = scope.state.rename.value;
                             scope.state.rename = null;
                         }).error(function(err){
@@ -57,13 +53,9 @@ ngApp.directive('folder', ['$mailbox', '$app', function($mailbox, $app){
                     scope.state.rename = null;
                }
            }
-           scope.state = scope.states[scope.folder.path] = scope.states[scope.folder.path] || {};
-           scope.$watch('folder.path', function(oldValue, newValue){
-               if (newValue != oldValue) {
-                    console.log("value changed: " + oldValue + " " + newValue);
-                    delete scope.states[oldValue];
-                    scope.state = scope.states[newValue] = scope.states[newValue] || {};
-               }
+           scope.state = scope.states[scope.folder.id] = scope.states[scope.folder.id] || {};
+           scope.$watch('folder.id', function(){
+                scope.state = scope.states[scope.folder.id] = scope.states[scope.folder.id] || {};
            });
            scope.contextMenu = [
                {
@@ -77,7 +69,7 @@ ngApp.directive('folder', ['$mailbox', '$app', function($mailbox, $app){
                    click: function() {
                         //TODO megerősítés kérés
                         if (!scope.hasChildren()) {
-                            $mailbox.deleteFolder(scope.folder);
+                            $mailbox.deleteFolder(scope.folder.id);
                         } else {
                             alert("The selected folder has inferiors.");
                         }

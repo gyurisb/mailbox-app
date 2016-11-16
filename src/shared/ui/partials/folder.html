@@ -1,6 +1,6 @@
 <div context-menu="contextMenu">
     <div ng-drag="{ folder: folder }">
-        <md-list-item ng-class="{'md-selected': folder.path==selected.path, 'md-unseen': folder.unseen > 0}" ng-click="selectFolder()" class="md-list-folder" ng-drop="drop($data)">
+        <md-list-item ng-class="{'md-selected': folder.id==selected.id, 'md-unseen': folder.unseen > 0}" ng-click="selectFolder()" class="md-list-folder" ng-drop="drop($data)">
             <div class="md-list-item-text" layout="column">
                 <p ng-if="!state.rename">
                     {{folder.name}}

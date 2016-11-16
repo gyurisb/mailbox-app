@@ -31,9 +31,9 @@ ngApp.factory('$app', ['$master', '$rootScope',
                     callback();
                 });
             },
-            focusFolder: function(path) {
+            focusFolder: function(folder) {
                 folderFocusedCallbacks.forEach(function(callback){
-                    callback(path);
+                    callback(folder);
                 });
             },
             focusEmail: function(email) {
@@ -41,9 +41,9 @@ ngApp.factory('$app', ['$master', '$rootScope',
                     callback(email);
                 });
             },
-            modifyEmail: function(path, uid) {
+            modifyEmail: function(emailId) {
                 emailModifiedCallbacks.forEach(function(callback){
-                    callback(path, uid);
+                    callback(emailId);
                 });
             },
             closeEmail: function() {

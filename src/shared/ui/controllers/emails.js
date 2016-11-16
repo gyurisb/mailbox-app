@@ -1,64 +1,53 @@
 ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '$filter', '$document', '$window', function($scope, $mailbox, $app, $master, $filter, $document, $window) {
     
-    $scope.path = null;
+    $scope.folderId = null;
     $scope.page = 0;
     $scope.emails = [];
     $scope.hasNextPage = false;
-    $scope.selectedEmail = null;
-    $scope.selectedPath = null;
+    $scope.selected = null;
     
-    function loadEmails(currentPath) {
-        $mailbox.getEmails(currentPath || $scope.path, $scope.page*$scope.itemCount, $scope.itemCount + 1).success(function(emails){
+    function loadEmails(folderId) {
+        $mailbox.getEmails(folderId || $scope.folderId, $scope.page*$scope.itemCount, $scope.itemCount + 1).success(function(emails){
+            $scope.folderId = folderId || $scope.folderId;
             $master.focus(1);
             $scope.emails = emails.slice(0, $scope.itemCount);
             $scope.paddings = [];
             $scope.hasNextPage = emails.length == $scope.itemCount + 1;
             for (var i = 0; i < $scope.itemCount - $scope.emails.length; i++)
                 $scope.paddings.push({});
-            if (currentPath)
-                $scope.path = currentPath;
         });
     }
-    
-    $app.onRestore(function(){
-        if (platform == 'desktop') {
-            loadEmails('Inbox');
+
+    function foldersLoaded(root) {
+        if ($scope.folderId == null && root && root.children.length > 0) {
+            loadEmails(root.children[0].id);
         }
-    });
+    }
     
-    $app.onFolderFocus(function(currentPath) {
-        if (platform == 'mobile' || currentPath != $scope.path) {
+    $app.onFolderFocus(function(folder) {
+        if (platform == 'mobile' || folder.id != $scope.folderId) {
             $scope.page = 0;
-            loadEmails(currentPath);
+            loadEmails(folder.id);
         }
     });
     
     $mailbox.onFolderUpdate(function(folder){
-        if (folder.path == $scope.path && $master.isFocused(1)) {
+        if (folder.id == $scope.folderId && $master.isFocused(1)) {
             loadEmails();
         }
     });
-
-    $app.onEmailModify(function(path, uid){
-        if (path == $scope.path && uid == $scope.selectedEmail) {
-            $scope.selectedEmail = null;
-            $scope.selectedPath = null;
-        }
+    
+    $app.onRestore(function(){
+        $mailbox.getFolders().success(foldersLoaded);
+    });
+    
+    $mailbox.onMailboxUpdate(function(){
+        $mailbox.getFolders().success(foldersLoaded);
     });
 
-    $mailbox.onEmailUpdate(function(evt){
-        if (evt.oldPath == $scope.selectedPath && evt.oldUid == $scope.selectedEmail) {
-            $scope.selectedEmail = evt.newUid;
-            $scope.selectedPath = evt.newPath;
-        }
-    });
-
-    $mailbox.onFolderPathUpdate(function(evt){
-        if (evt.oldPath == $scope.path || $scope.path.indexOf(evt.oldPath + evt.delimiter) == 0) {
-            $scope.path = evt.newPath ? $scope.path.replace(evt.oldPath, evt.newPath) : null;
-        }
-        if (evt.oldPath == $scope.selectedPath || $scope.selectedPath.indexOf(evt.oldPath + evt.delimiter) == 0) {
-            $scope.selectedPath = evt.newPath ? $scope.selectedPath.replace(evt.oldPath, evt.newPath) : null;
+    $app.onEmailModify(function(emailId){
+        if (emailId == $scope.selected) {
+            $scope.selected = null
         }
     });
     
@@ -73,8 +62,7 @@ ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '
     }
     
     $scope.emailClicked = function(email){
-        $scope.selectedEmail = email.uid;
-        $scope.selectedPath = $scope.path;
+        $scope.selected = email.id;
         $app.focusEmail(email);
     }
     

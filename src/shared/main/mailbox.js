@@ -9,8 +9,6 @@ function Mailbox(SQLiteSubsystem, FileSubsystem, EmailConnection, EmailStore) {
     var folderUpdateCallback = function(){};
     var mailboxUpdateCallback = function(){};
     var accountUpdateCallback = function(){};
-    var emailUpdateCallback = function(){};
-    var folderPathUpdateCallback = function(){};
     var fetchCanceled = false;
     var fetchInProgress = true;
     var restartFetch = false;
@@ -51,10 +49,8 @@ function Mailbox(SQLiteSubsystem, FileSubsystem, EmailConnection, EmailStore) {
                             var checkEmail = EmailStore.searchEmail(args.email, result.messages);
                             if (checkEmail) {
                                 if (args.email.uid != null) {
-                                    store.setUids(args.targetPath, args.email.uid, checkEmail.uid, function(){
+                                    store.setUids(args.email.uid, checkEmail.uid, function(){
                                         success();
-                                        emailUpdateCallback({ oldPath: args.targetPath, oldUid: args.email.uid, newPath: args.targetPath, newUid: checkEmail.uid });
-                                        folderUpdateCallback({ path: args.targetPath });
                                     });
                                 } else {
                                     success();
@@ -85,33 +81,33 @@ function Mailbox(SQLiteSubsystem, FileSubsystem, EmailConnection, EmailStore) {
     return mailbox = {
         login: function(credentials, success, error) {
             login(credentials, function() {
-                success();
                 accountUpdateCallback({ type: "account", email: credentials.username });
-                mainStore.saveAccount(credentials);
+                mainStore.saveAccount(credentials, success);
                 fetch();
             }, error);
         },
         restore: function(success, error) {
             mainStore.open(function(){
-                mainStore.createDatabase();
-                mainStore.getAccounts(function(accounts) {
-                    accounts = accounts || [];
-                    if (accounts.length == 0) {
-                        accountUpdateCallback({ type: "account" });
-                    } else {
-                        var account = accounts[0];
-                        store = new mainStore.Account(account.username);
-                        accountUpdateCallback({ type: "account", email: account.username });
-                        accountUpdateCallback({ type: "progress", phase: "login", progress: -1 });
-                        login(account, function(){
-                            fetch();
-                        }, function(err){
-                            error(err);
-                            accountError(err);
-                            conn = null;
-                        });
-                    }
-                    success();
+                mainStore.createDatabase(function(){
+                    mainStore.getAccounts(function(accounts) {
+                        accounts = accounts || [];
+                        if (accounts.length == 0) {
+                            accountUpdateCallback({ type: "account" });
+                        } else {
+                            var account = accounts[0];
+                            store = new mainStore.Account(account.username);
+                            accountUpdateCallback({ type: "account", email: account.username });
+                            accountUpdateCallback({ type: "progress", phase: "login", progress: -1 });
+                            login(account, function(){
+                                fetch();
+                            }, function(err){
+                                error(err);
+                                accountError(err);
+                                conn = null;
+                            });
+                        }
+                        success();
+                    });
                 });
             });
         },
@@ -120,158 +116,200 @@ function Mailbox(SQLiteSubsystem, FileSubsystem, EmailConnection, EmailStore) {
                 success(EmailStore.createFolderTree(cachedFolders));
             });
         },
-        createFolder: function(parentFolder, name, success, error) {
+        createFolder: function(parentId, name, success, error) {
             cancelFetchProcess(function(){
-                var path = parentFolder ? parentFolder.path + parentFolder.delimiter + name : name;
-                store.createFolder(path, name, function(err){
-                    if (!err) {
+                store.createFolder(parentId, name, function(folder){
+                    if (folder) {
                         success();
                         mailboxUpdateCallback();
-                        store.pushCommand('createFolder', { path: path }, executeCommandsAsync);
+                        store.pushCommand('createFolder', { path: folder.path }, restartFetchProcess);
                     } else {
                         error({ type: "folderDuplicate", message: "Folder with the given name already exists." });
                     }
                 });
             });
         },
-        moveFolder: function(folder, targetFolder, success, error) {
-            cancelFetchProcess(function(){
-                var targetRoute = targetFolder ? targetFolder.path.split(targetFolder.delimiter) : [];
-                var folderId = folder.path.split(folder.delimiter).slice(-1);
-                var newPath = targetRoute.concat(folderId).join(folder.delimiter);
-                //TODO leállítani a FETCH folyamatot és újraindítani
-                store.moveFolder(folder.path, newPath, folder.name, function(err){
-                    if (!err) {
-                        success();
-                        mailboxUpdateCallback();
-                        folderPathUpdateCallback({ oldPath: folder.path, newPath: newPath, delimiter: folder.delimiter });
-                        store.pushCommand('movefolder', { path: folder.path, newPath: newPath }, executeCommandsAsync);
+        moveFolder: function(id, targetId, success, error) {
+            store.getFolder(id, function(folder){
+                store.getFolder(targetId, function(targetFolder){
+                    if (id != targetId && folder.parentId != targetId && (!targetFolder || targetFolder.path.indexOf(folder.path + folder.delimiter) != 0)) {
+                        cancelFetchProcess(function(){
+                            store.moveFolder(folder.id, targetId, function(newFolder){
+                                if (newFolder) {
+                                    success();
+                                    mailboxUpdateCallback();
+                                    folderUpdateCallback({ id: folder.id });
+                                    store.pushCommand('movefolder', { path: folder.path, newPath: newFolder.path }, restartFetchProcess);
+                                } else {
+                                    error({ type: "folderDuplicate", message: "Folder with the given name already exists." });
+                                    restartFetchProcess();
+                                }
+                            });
+                        });
                     } else {
-                        error({ type: "folderDuplicate", message: "Folder with the given name already exists." });
+                        error({ type: "invalidTargetFolder", message: "The folder cannot be moved to the selected folder." });
                     }
                 });
             });
         },
-        renameFolder: function(folder, name, success, error) {
+        renameFolder: function(id, name, success, error) {
             cancelFetchProcess(function(){
-                var newPath = folder.path.split(folder.delimiter).slice(0, -1).concat([name]).join(folder.delimiter);
-                store.moveFolder(folder.path, newPath, name, function(err){
-                    if (!err) {
+                store.getFolder(id, function(folder){
+                    store.renameFolder(folder.id, name, function(newFolder){
+                        if (newFolder) {
+                            success();
+                            mailboxUpdateCallback();
+                            folderUpdateCallback({ id: folder.id });
+                            store.pushCommand('movefolder', { path: folder.path, newPath: newFolder.path }, restartFetchProcess);
+                        } else {
+                            error({ type: "folderDuplicate", message: "Folder with the given name already exists." });
+                            restartFetchProcess();
+                        }
+                    });
+                });
+            });
+        },
+        deleteFolder: function(id, success, error) {
+            cancelFetchProcess(function(){
+                store.getFolder(id, function(folder){
+                    store.deleteFolder(folder.id, function(){
                         success();
                         mailboxUpdateCallback();
-                        folderPathUpdateCallback({ oldPath: folder.path, newPath: newPath, delimiter: folder.delimiter });
-                        store.pushCommand('movefolder', { path: folder.path, newPath: newPath }, executeCommandsAsync);
-                    } else {
-                        error({ type: "folderDuplicate", message: "Folder with the given name already exists." });
-                    }
+                    });
+                    store.pushCommand('deleteFolder', { path: folder.path }, restartFetchProcess);
                 });
             });
         },
-        deleteFolder: function(folder, success, error) {
-            cancelFetchProcess(function(){
-                store.deleteFolder(folder.path, function(){
-                    success();
-                    mailboxUpdateCallback();
-                    folderPathUpdateCallback({ oldPath: folder.path, delimiter: folder.delimiter });
-                });
-                store.pushCommand('deleteFolder', { path: folder.path }, executeCommandsAsync);
-            });
-        },
-        getEmails: function(path, offset, count, success, error) {
-            store.getEmails(path, offset, count, function(cachedEmails) {
+        getEmails: function(folderId, offset, count, success, error) {
+            store.getEmails(folderId, offset, count, function(cachedEmails) {
                 success(cachedEmails);
                 if (cachedEmails.length < count) {
-                    store.getFolder(path, function(folder) {
+                    store.getFolder(folderId, function(folder) {
                         if (folder && !folder.totalSynced) {
-                            accountUpdateCallback({ type: "folderProgress", folder: path, progress: true });
+                            accountUpdateCallback({ type: "folderProgress", folder: folderId, progress: true });
                             cancelFetchProcess(function(){
-                                store.setSyncAll(path, executeCommandsAsync);
+                                store.setSyncAll(folderId, restartFetchProcess);
                             });
                         }
                     });
                 }
             });
         },
-        getEmailBody: function(path, uid, seen, success, error) {
-            store.getEmailBody(path, uid, function(body){
-                success(body);
-            });
-            if (!seen) {
-                cancelFetchProcess(function(){
-                    store.seeEmail(path, uid, function(){
-                        mailboxUpdateCallback();
-                        folderUpdateCallback({ path: path });
-                    });
-                    store.pushCommand('setEmailRead', { path: path, uid: uid }, executeCommandsAsync);
+        getEmailBody: function(emailId, success, error) {
+            store.getEmail(emailId, function(email){
+                store.getEmailBody(email.id, function(body){
+                    success(body);
                 });
-            }
-        },
-        getEmailAttachment: function(path, uid, part, destFileName, success, error) {
-            if (uid >= 0) {
-                awaitConnection(function(){
-                    conn.getEmailAttachment(path, uid, part, function(content){
-                        fs.writeFile(destFileName, content, 'base64', function(err){
-                            if (err) {
-                                error(err);
-                            } else {
-                                success();
-                            }
+                if (!email.seen) {
+                    cancelFetchProcess(function(){
+                        store.seeEmail(email.id, function(){
+                            mailboxUpdateCallback();
+                            folderUpdateCallback({ id: email.folderId });
                         });
-                    }, error);
-                }, error);
-            } else {
-                error({ type: "emailModifyInProgress", message: "An operation is pending on the selected email." });
-            }
-        },
-        deleteEmail: function(path, uid, success, error) {
-            cancelFetchProcess(function(){
-                if (path != "Deleted") {
-                    mailbox.moveEmail(path, uid, "Deleted", success, error);
-                } else {
-                    store.deleteEmail(path, uid, function(){
-                        folderUpdateCallback({ path: path });
-                        success();
+                        store.getFolder(email.folderId, function(folder){
+                            store.pushCommand('setEmailRead', { path: folder.path, uid: email.uid }, restartFetchProcess);
+                        });
                     });
-                    store.pushCommand('deleteEmail', { path: path, uid: uid }, executeCommandsAsync);
                 }
             });
         },
-        moveEmail: function(path, uid, targetPath, success, error) {
-            cancelFetchProcess(function(){
-                store.getFolder(targetPath, function(targetFolder){
-                    store.getOldestDate(targetPath, function(targetOldestDate){
-                        store.getEmailProperties(path, uid, function(email){
-                            if (targetFolder.totalSynced || targetOldestDate < new Date(email.date)) {
-                                store.moveEmail(path, uid, targetPath, function(newUid){
-                                    email.uid = newUid;
-                                    store.pushCommand('moveEmail', { path: path, targetPath: targetPath, email: email }, executeCommandsAsync);
-                                    success();
-                                    folderUpdateCallback({ path: path });
-                                    folderUpdateCallback({ path: targetPath });
-                                    emailUpdateCallback({ oldPath: path, oldUid: uid, newPath: targetPath, newUid: newUid });
-                                    mailboxUpdateCallback();
+        getEmailAttachment: function(emailId, part, destFileName, success, error) {
+            store.getEmail(emailId, function(email){
+                store.getFolder(email.folderId, function(folder){
+                    email.folder = folder;
+                    if (email.uid >= 0) {
+                        awaitConnection(function(){
+                            conn.getEmailAttachment(email.folder.path, email.uid, part, function(content){
+                                fs.writeFile(destFileName, content, 'base64', function(err){
+                                    if (!err) {
+                                        success();
+                                    } else {
+                                        error(err);
+                                    }
                                 });
+                            }, error);
+                        }, error);
+                    } else {
+                        error({ type: "emailModifyInProgress", message: "An operation is pending on the selected email." });
+                    }
+                });
+            });
+        },
+        deleteEmail: function(emailId, success, error) {
+            cancelFetchProcess(function(){
+                store.getEmail(emailId, function(email){
+                    store.getFolder(email.folderId, function(sourceFolder){
+                        email.folder = sourceFolder;
+                        store.getTrashFolder(function(trashFolder){
+                            if (email.folderId != trashFolder.id) {
+                                mailbox.moveEmail(email.id, trashFolder.id, success, error);
                             } else {
-                                store.deleteEmail(path, uid, success);
-                                email.uid = null;
-                                store.pushCommand('moveEmail', { path: path, targetPath: targetPath, email: email }, executeCommandsAsync);
+                                store.deleteEmail(email.id, function(){
+                                    folderUpdateCallback({ id: email.folder.id });
+                                    success();
+                                });
+                                store.pushCommand('deleteEmail', { path: email.folder.path, uid: email.uid }, restartFetchProcess);
                             }
-                        });
+                        })
                     });
                 });
+            });
+        },
+        moveEmail: function(emailId, targetFolderId, success, error) {
+            store.getEmail(emailId, function(email){
+                if (email.folderId != targetFolderId) {
+                    cancelFetchProcess(function(){
+                        store.getFolder(email.folderId, function(sourceFolder){
+                            email.folder = sourceFolder;
+                            store.getFolder(targetFolderId, function(targetFolder){
+                                store.getOldestDate(targetFolder.id, function(targetOldestDate){
+                                    if (targetFolder.totalSynced || targetOldestDate < new Date(email.date)) {
+                                        store.moveEmail(email.id, targetFolder.id, function(newUid){
+                                            email.uid = newUid;
+                                            success();
+                                            folderUpdateCallback({ id: email.folder.id });
+                                            folderUpdateCallback({ id: targetFolder.id });
+                                            mailboxUpdateCallback();
+                                            store.pushCommand('moveEmail', { path: email.folder.path, targetPath: targetFolder.path, email: email, uid: newUid }, restartFetchProcess);
+                                        });
+                                    } else {
+                                        store.deleteEmail(email.id, success);
+                                        email.uid = null;
+                                        store.pushCommand('moveEmail', { path: email.folder.path, targetPath: targetFolder.path, email: email }, restartFetchProcess);
+                                    }
+                                });
+                            });
+                        });
+                    });
+                } else {
+                    error({ type: "invalidTargetFolder" });
+                }
             });
         },
         sendEmail: function(message, success, error) {
-            message.attachments.forEach(function(attachment){
-                if (attachment.type == "file") {
-                    var bitmap = fs.readFileSync(attachment.path);
-                    attachment.data = Buffer(bitmap).toString('base64');
-                }
-            });
-            cancelFetchProcess(function(){
-                store.pushCommand('sendEmail', message, executeCommandsAsync);
-                success();
-            });
+            if (message.replyToId != null) {
+                store.getEmail(message.replyToId, function(email){
+                    store.getFolder(email.folderId, function(folder){
+                        finishSendEmail(email.uid, folder.path);
+                    });
+                });
+            } else {
+                finishSendEmail(null, null);
+            }
+            function finishSendEmail(uid, path) {
+                message.attachments.forEach(function(attachment){
+                    if (attachment.type == "file") {
+                        var bitmap = fs.readFileSync(attachment.path);
+                        attachment.data = Buffer(bitmap).toString('base64');
+                    }
+                });
+                message.uid = uid;
+                message.path = path;
+                cancelFetchProcess(function(){
+                    store.pushCommand('sendEmail', message, restartFetchProcess);
+                    success();
+                });
+            }
         },
         contacts: function(key, success, error) {
             mainStore.getContacts(key, success);
@@ -284,12 +322,6 @@ function Mailbox(SQLiteSubsystem, FileSubsystem, EmailConnection, EmailStore) {
         },
         onFolderUpdate: function(callback) {
             folderUpdateCallback = callback;
-        },
-        onEmailUpdate: function(callback) {
-            emailUpdateCallback = callback;
-        },
-        onFolderPathUpdate: function(callback) {
-            folderPathUpdateCallback = callback;
         }
     };
 
@@ -396,8 +428,8 @@ function Mailbox(SQLiteSubsystem, FileSubsystem, EmailConnection, EmailStore) {
                 conn.getNewEmails(folder.path, firstDate, success, error);
             },
             processing: function(emails, success, error) {
-                store.syncFolder(folder.path, function() {
-                    store.saveEmails(emails, folder.path, function(){
+                store.syncFolder(folder.id, function() {
+                    store.saveEmails(emails, folder.id, function(){
                         if (emails.length > 0) {
                             folderUpdateCallback(folder);
                             mailboxUpdateCallback();
@@ -417,20 +449,20 @@ function Mailbox(SQLiteSubsystem, FileSubsystem, EmailConnection, EmailStore) {
             },
             processing: function(result, success, error) {
                 if (!lastDate) {
-                    store.syncFolder(folder.path, afterSync);
+                    store.syncFolder(folder.id, afterSync);
                 } else {
                     afterSync();
                 }
                 function afterSync() {
-                    store.setTotalSynced(folder.path, !result.hasMore, function(){
-                        store.saveEmails(result.messages, folder.path, function(savedEmailsCount){
+                    store.setTotalSynced(folder.id, !result.hasMore, function(){
+                        store.saveEmails(result.messages, folder.id, function(savedEmailsCount){
                             if (savedEmailsCount > 0) {
                                 folderUpdateCallback(folder);
                                 mailboxUpdateCallback();
                             }
-                            store.resetSyncAll(folder.path, function(){
+                            store.resetSyncAll(folder.id, function(){
                                 success();
-                                accountUpdateCallback({ type: "folderProgress", folder: folder.path, progress: false });
+                                accountUpdateCallback({ type: "folderProgress", folder: folder.id, progress: false });
                             });
                         });
                     });
@@ -463,7 +495,7 @@ function Mailbox(SQLiteSubsystem, FileSubsystem, EmailConnection, EmailStore) {
         });
     }
 
-    function executeCommandsAsync() {
+    function restartFetchProcess() {
         if (!fetchInProgress) {
             fetch();
         } else {

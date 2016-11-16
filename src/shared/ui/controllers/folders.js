@@ -1,6 +1,6 @@
 ngApp.controller('FoldersController', ['$scope', '$mailbox', '$app', '$master', function($scope, $mailbox, $app, $master) {
 
-    $scope.selected = { path: null };
+    $scope.selected = { id: null };
     $scope.new = null;
     $scope.folderStates = {};
 
@@ -17,25 +17,12 @@ ngApp.controller('FoldersController', ['$scope', '$mailbox', '$app', '$master', 
         }
     ];
     
-    $mailbox.onFolderPathUpdate(function(evt){
-        if (evt.oldPath == $scope.selected.path || $scope.selected.path.indexOf(evt.oldPath + evt.delimiter) == 0) {
-            $scope.selected.path = evt.newPath ? $scope.selected.path.replace(evt.oldPath, evt.newPath) : null;
-        }
-        Object.keys($scope.folderStates).forEach(function(path){
-            if (evt.oldPath == path || path.indexOf(evt.oldPath + evt.delimiter) == 0) {
-                if (evt.newPath) {
-                    $scope.folderStates[path.replace(evt.oldPath, evt.newPath)] = $scope.folderStates[path];
-                }
-                delete $scope.folderStates[path];
-            }
-        });
-    });
-    
     function foldersLoaded(root) {
         if (!angular.equals(root, $scope.root)) {
             $scope.root = root;
-            if ($scope.selected.path == null && root && root.children.length)
-                $scope.selected.path = root.children[0].path;
+            if ($scope.selected.id == null && root && root.children.length) {
+                $scope.selected.id = root.children[0].id;
+            }
         }
     }
     
@@ -47,11 +34,9 @@ ngApp.controller('FoldersController', ['$scope', '$mailbox', '$app', '$master', 
         $mailbox.getFolders().success(foldersLoaded);
     });
 
-    $scope.dropFolderOnRoot = function(source) {
-        if (source.folder != null) {
-            if (source.folder.path.indexOf(source.folder.delimiter) >= 0) {
-                $mailbox.moveFolder(source.folder, null);
-            }
+    $scope.dropFolderOnRoot = function(dragged) {
+        if (dragged.folder != null) {
+            $mailbox.moveFolder(dragged.folder.id, null);
         }
     }
 
