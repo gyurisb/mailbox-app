@@ -1,6 +1,6 @@
 ngApp.factory('$mailbox', ['$timeout',
     function($timeout) {
-        var mailbox = new Mailbox(SQLitePluginSubsystem, Object, EmailConnectionProxy, EmailStore);
+        var mailbox = new Mailbox(LockObject, SQLitePluginSubsystem, Object, EmailConnectionProxy, FetchProcess, ServerCommands, EmailStore, AccountsTable, ContactsTable, EmailsTable, FoldersTable, QueueTable);
         var service = {};
         Object.keys(mailbox).forEach(function(action){
             if (action.substr(0, 2) == "on") {

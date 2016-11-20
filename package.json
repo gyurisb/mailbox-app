@@ -36,7 +36,6 @@
     "wo-smtpclient": "0.6.1",
     "emailjs-mime-parser": "1.0.0",
     "emailjs-mime-builder": "1.0.1",
-    "semaphore": "^1.0.5",
     "wo-utf7": "2.0.2"
   }
 }

@@ -27,10 +27,10 @@ gulp.task('build', function() {
     gulp.src('src/mobile/**')
         .pipe(gulp.dest('dist/mobile'));
     
-    gulp.src('src/shared/email/*.js')
+    gulp.src('src/shared/email/**/*.js')
         .pipe(gulp.dest('dist/desktop/main'))
         .pipe(gulp.dest('dist/mobile/server'));
-    gulp.src('src/shared/main/*.js')
+    gulp.src('src/shared/main/**/*.js')
         .pipe(gulp.dest('dist/desktop/main'))
         .pipe(gulp.dest('dist/mobile/cordova/www/js'));
     gulp.src('src/shared/ui/**/*')

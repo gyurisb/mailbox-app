@@ -2,8 +2,8 @@ ngApp.controller('MainController', ['$scope', '$app', '$master', '$mailbox', fun
     
     mainScope = $scope;
     $master.setScope($scope);
-    $scope.page = 0;
     $scope.title = "Mailbox";
+    $scope.loggedIn = false;
     $scope.folderInProgress = {};
 
     $mailbox.onAccountUpdate(function(evt){
@@ -34,18 +34,7 @@ ngApp.controller('MainController', ['$scope', '$app', '$master', '$mailbox', fun
         }
     });
 
-    $scope.loggedIn = false;
     $mailbox.restore();
-    
-    $scope.newEmail = function() {
-        $app.newEmail();
-    };
-    
-    $scope.editAccount = function() {
-    }
-    
-    $scope.logout = function() {
-    }
 
     $scope.back = function() {
         window.history.back();

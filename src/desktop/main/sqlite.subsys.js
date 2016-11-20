@@ -13,11 +13,17 @@ function SQLite3Subsystem(path) {
         },
         all: function(query, params, success) {
             db.all(query, params, function(err, all) {
+                if (err && err.message.indexOf("UNIQUE constraint failed") == -1) {
+                    throw [err, query, params];
+                }
                 success(all);
             });
         },
         run: function(statement, params, done) {
             db.run(statement, params, function(err, res){
+                if (err && err.message.indexOf("UNIQUE constraint failed") == -1) {
+                    throw [err, statement, params];
+                }
                 if (done !== undefined)
                     done(err, res);
             });

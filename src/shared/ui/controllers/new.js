@@ -21,6 +21,7 @@ ngApp.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$time
     $app.onEmailParameters(function(params){
         $scope.to = [];
         $scope.toBcc = [];
+        $scope.subject = "";
         $scope.message = { body: "" };
         $scope.attachments = [];
         if (params.replyTo) {
@@ -59,6 +60,7 @@ ngApp.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$time
         $scope.isSending = true;
         var body = $scope.message.body;
         if (!$scope.allowFormatting) {
+            //TODO HTML encoding
             body = body.replace(/\n/g, '<br/>');
             if ($scope.trailer) {
                 body = body + "<br><br>" + $scope.trailer;

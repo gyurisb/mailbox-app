@@ -11,22 +11,12 @@ function EmailConnectionProxy() {
             var params = args.slice(0, -2);
             var success = args.slice(-2)[0];
             var error = args.slice(-1)[0];
-            request('POST', action, params, action == "login").success(success).error(error);
+            request('POST', action, params, action == "login", success, error);
         }
     });
     return proxy;
 
-    function request(method, action, data, saveToken) {
-        var future = {
-            success: function(callback) {
-                future.onSuccess = callback;
-                return future;
-            },
-            error: function(callback) {
-                future.onError = callback;
-                return future;
-            }
-        };
+    function request(method, action, data, saveToken, success, error) {
         $.ajax(backendHostName + '/' + action, {
            method: method,
            headers: {
@@ -39,14 +29,11 @@ function EmailConnectionProxy() {
             success: function(responseData) {
                 if (saveToken)
                     token = responseData;
-                if (future.onSuccess !== undefined)
-                    future.onSuccess(responseData);
+                success(responseData);
             },
             error: function(err, status, message) {
-                if (future.onError !== undefined)
-                    future.onError(err);
+                error(err);
             }
         });
-        return future;
     }
 }

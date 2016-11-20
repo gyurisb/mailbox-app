@@ -1,6 +1,6 @@
 ngApp.controller('ReaderController', ['$scope', '$mailbox', '$app', '$master', '$filter', function($scope, $mailbox, $app, $master, $filter) {
     
-    var downloadsInProgress = {};
+    $scope.downloadsInProgress = {};
 
     $app.onEmailFocus(function(email) {
         if (platform == "mobile" || email != $scope.email) {
@@ -26,7 +26,7 @@ ngApp.controller('ReaderController', ['$scope', '$mailbox', '$app', '$master', '
     });
 
     $app.onEmailModify(function(emailId) {
-        if (emailId == $scope.email.id) {
+        if ($scope.email && emailId == $scope.email.id) {
             $scope.email = null;
             $app.closeEmail();
         }
@@ -34,19 +34,15 @@ ngApp.controller('ReaderController', ['$scope', '$mailbox', '$app', '$master', '
 
     $scope.download = function(attachment) {
         $app.showSaveDialog(attachment.name, function(filePath){
-            var attachmentKey = attachment.part + '/' + $scope.email.id;
-            downloadsInProgress[attachmentKey] = true;
-            $scope.downloadInProgress = true;
-            $mailbox.getEmailAttachment($scope.email.id, attachment.part, filePath).success(finishProgress).error(function(err){
-                finishProgress();
-                alert("Error saving attachment:\n" + JSON.stringify(err))
-            });
-            function finishProgress() {
-                delete downloadsInProgress[attachmentKey];
-                $scope.downloadInProgress = Object.keys(downloadsInProgress).length;
-            }
+            $scope.downloadsInProgress[$scope.email.id] = $scope.downloadsInProgress[$scope.email.id] || 0;
+            $scope.downloadsInProgress[$scope.email.id]++;
+            $mailbox.getEmailAttachment($scope.email.id, attachment.part, filePath);
         });
     }
+
+    $mailbox.onDownloadFinish(function(evt){
+        $scope.downloadsInProgress[evt.emailId]--;
+    });
 
     $scope.reply = function() {
         $app.newEmail({ replyTo: $scope.email });

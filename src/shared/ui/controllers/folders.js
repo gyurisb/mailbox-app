@@ -33,6 +33,10 @@ ngApp.controller('FoldersController', ['$scope', '$mailbox', '$app', '$master', 
     $mailbox.onMailboxUpdate(function(){
         $mailbox.getFolders().success(foldersLoaded);
     });
+    
+    $scope.newEmail = function() {
+        $app.newEmail();
+    };
 
     $scope.dropFolderOnRoot = function(dragged) {
         if (dragged.folder != null) {

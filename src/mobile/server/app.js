@@ -4,11 +4,10 @@ const http         = require('http'),
       contentTypes = require('./utils/content-types'),
       sysInfo      = require('./utils/sys-info'),
       env          = process.env;
-//  Module for email handling;
+const express = require('express');
+const bodyParser = require('body-parser');
+const semaphore = require('semaphore');
 const EmailConnection = require('./email_conn.js');
-// Modules for request handling
-var express = require('express');
-var bodyParser = require('body-parser');
 
 var sessions = {};
 var accounts = {};
@@ -16,9 +15,7 @@ var accounts = {};
 var app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-// app.use('/', express.static('C:/Users/Bence/Documents/Diplomamunka/mailbox-app/dist/mobile/cordova/www'));
 
-// IMPORTANT: Your application HAS to respond to GET /health with status 200
 app.get('/health', function(req, res) {
 	res.writeHead(200);
 	res.end();
@@ -27,15 +24,15 @@ app.post('/login', function (req, res) {
     var conn = new EmailConnection();
     var username = req.body.username;
     conn.login(req.body[0], function(){
-        res.writeHead(200, {'Content-Type': 'application/json'});
         if (accounts[username] !== undefined) {
             var oldToken = accounts[username];
-            sessions[oldToken].close();
-            sessions[oldToken] = undefined;
+            sessions[oldToken].conn.close();
+            delete sessions[oldToken];
         }
         var token = createToken();
-        sessions[token] = conn;
+        sessions[token] = { conn: conn, lock: semaphore(1) };
         accounts[username] = token;
+        res.writeHead(200, {'Content-Type': 'application/json'});
         res.end(JSON.stringify(token));
     }, function(error){
         res.writeHead(500, {'Content-Type': 'application/json'}); 
@@ -44,14 +41,22 @@ app.post('/login', function (req, res) {
 });
 Object.keys(new EmailConnection()).filter(a => a != "login").forEach(function(action){
     app.post('/' + action, function(req, res){
-        var conn = sessions[req.get('Authorization')];
-        conn[action].apply(conn, req.body.concat([function(result){
-            res.writeHead(200, {'Content-Type': 'application/json'}); 
-            res.end(JSON.stringify(result));
-        }, function(error){
-            res.writeHead(500, {'Content-Type': 'application/json'}); 
-            res.end(JSON.stringify(error));
-        }]));
+        var session = sessions[req.get('Authorization')];
+        if (session) {
+            session.lock.take(function(){
+                session.conn[action].apply(session.conn, req.body.concat([function(result){
+                    session.lock.leave();
+                    res.writeHead(200, {'Content-Type': 'application/json'}); 
+                    res.end(JSON.stringify(result));
+                }, function(error){
+                    res.writeHead(500, {'Content-Type': 'application/json'}); 
+                    res.end(JSON.stringify(error));
+                }]));
+            });
+        } else {
+            res.writeHead(401, {'Content-Type': 'application/json'});
+            res.end();
+        }
     });
 });
 

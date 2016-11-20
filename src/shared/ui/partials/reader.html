@@ -1,6 +1,6 @@
 <div ng-controller="ReaderController" class="reader">
     <md-card ng-if="email" class="email-header">
-        <md-progress-linear ng-if="downloadInProgress" md-mode="query"></md-progress-linear>
+        <md-progress-linear ng-if="downloadsInProgress[email.id]" md-mode="query"></md-progress-linear>
         <md-card-content>
             <p class="email-header-subject">{{email.subject}}</p>
             <p>from {{formatContact(email.senderName, email.senderEmail)}}</p>

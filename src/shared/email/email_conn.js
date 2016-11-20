@@ -2,7 +2,6 @@ const BrowserBox = require('browserbox');
 const SmtpClient = require('wo-smtpclient');
 const MimeParser = require('emailjs-mime-parser');
 const MimeBuilder = require('emailjs-mime-builder');
-const semaphore = require('semaphore');
 const utf7 = require('wo-utf7');
 
 module.exports = EmailConnection;
@@ -10,7 +9,6 @@ module.exports = EmailConnection;
 function EmailConnection() {
 	var conn;
 	var imap;
-	var imapLock = semaphore(1);
 	var sender;
 	var password;
 	var smtpHost;
@@ -18,222 +16,180 @@ function EmailConnection() {
 	var selectedFolder;
 	return conn = {
 		login: function(arg, success, error) {
-			imapLock.take(function() {
-				imap = new BrowserBox(arg.imapHost, arg.imapPort, {
-					auth: {
-						user: arg.username,
-						pass: arg.password
-					},
-					id: {
-						name: 'My Client',
-						version: '0.1'
-					}
-				});
-				imap.onauth = function() {
-					sender = arg.username;
-					password = arg.password;
-					smtpHost = arg.smtpHost;
-					smtpPort = arg.smtpPort;
-					imapLock.leave();
-					success();
-				};
-				var errorCalled = false;
-				imap.onerror = function(err) {
-					if (!errorCalled) {
-						errorCalled = true;
-						imapLock.leave();
-						error(err);
-					}
+			imap = new BrowserBox(arg.imapHost, arg.imapPort, {
+				auth: {
+					user: arg.username,
+					pass: arg.password
+				},
+				id: {
+					name: 'My Client',
+					version: '0.1'
 				}
-				imap.connect();
 			});
+			imap.onauth = function() {
+				imap.onerror = function(){};
+				sender = arg.username;
+				password = arg.password;
+				smtpHost = arg.smtpHost;
+				smtpPort = arg.smtpPort;
+				success();
+			};
+			imap.onerror = function(err) {
+				imap.onerror = function(){};
+				error(err);
+			}
+			imap.connect();
 		},
 		getFolders: function(success, error) {
-			imapLock.take(function() {
-				imap.listMailboxes(function(err, mailboxes) {
-					imapLock.leave();
-					if (err !== undefined && err !== null) {
-						error(err);
-					}
-					else {
-						convertMailbox(mailboxes);
-						success(mailboxes);
-						function convertMailbox(mailbox) {
-							if (mailbox.path) {
-								mailbox.path = utf7.imap.decode(mailbox.path);
-							}
-							if (mailbox.children) {
-								mailbox.children.forEach(convertMailbox);
-							}
+			imap.listMailboxes(function(err, mailboxes) {
+				if (err !== undefined && err !== null) {
+					error(err);
+				}
+				else {
+					convertMailbox(mailboxes);
+					success(mailboxes);
+					function convertMailbox(mailbox) {
+						if (mailbox.path) {
+							mailbox.path = utf7.imap.decode(mailbox.path);
+						}
+						if (mailbox.children) {
+							mailbox.children.forEach(convertMailbox);
 						}
 					}
-				});
+				}
 			});
 		},
 		createFolder: function(path, success, error) {
-			imapLock.take(function() {
-				imap.createMailbox(path, function(err, alreadyExists){
-					imapLock.leave();
-					if (!err && !alreadyExists) {
-						success();
-					} else {
-						error(err || alreadyExists);
-					}
-				});
+			imap.createMailbox(path, function(err, alreadyExists){
+				if (!err && !alreadyExists) {
+					success();
+				} else {
+					error(err || alreadyExists);
+				}
 			});
 		},
 		deleteFolder: function(path, success, error) {
-			imapLock.take(function() {
-				imap.exec({ command: 'DELETE', attributes: [utf7.imap.encode(path)] }, function(err, response, next) {
-					imapLock.leave();
-					if (err) {
-						error(err);
-					} else {
-						success();
-					}
-					next();
-				});
+			imap.exec({ command: 'DELETE', attributes: [utf7.imap.encode(path)] }, function(err, response, next) {
+				if (err) {
+					error(err);
+				} else {
+					success();
+				}
+				next();
 			});
 		},
 		moveFolder: function(path, targetPath, success, error) {
-			imapLock.take(function() {
-				imap.exec({ command: 'RENAME', attributes: [utf7.imap.encode(path), utf7.imap.encode(targetPath)] }, function(err, response, next) {
-					imapLock.leave();
-					if (err) {
-						error(err);
-					} else {
-						success();
-					}
-					next();
-				});
+			imap.exec({ command: 'RENAME', attributes: [utf7.imap.encode(path), utf7.imap.encode(targetPath)] }, function(err, response, next) {
+				if (err) {
+					error(err);
+				} else {
+					success();
+				}
+				next();
 			});
 		},
 		getLastEmails: function(path, count, lastDate, success, error) {
 			lastDate = lastDate ? new Date(lastDate.toString()) : null;
-			imapLock.take(function() {
-				imap.selectMailbox(utf7.imap.encode(path) || 'Inbox', function(err, mailbox){
-					if (err !== undefined && err !== null) {
-						imapLock.leave();
-						error(err);
-					} else {
-						count = Math.min(count, mailbox.exists);
-						searchEmails(count, lastDate || new Date(Date.now() + 1*24*60*60*1000), function(sids, hasMore){
-							var intervals = getIntervals(sids);
-							getEmailsByIntervals(intervals, function(messages){
-								imapLock.leave();
-								messages.sort((a, b) => new Date(b.envelope.date).valueOf() - new Date(a.envelope.date).valueOf());
-								if (lastDate) {
-									messages = messages.filter(msg => new Date(msg.envelope.date) <= lastDate);
-								}
-								if (count >= 0) {
-									messages = messages.slice(0, count);
-								}
-								success({ messages: messages.map(parseMessage), hasMore: hasMore && count != mailbox.exists });
-							}, error);
+			imap.selectMailbox(utf7.imap.encode(path) || 'Inbox', function(err, mailbox){
+				if (err !== undefined && err !== null) {
+					error(err);
+				} else {
+					selectedFolder = path;
+					count = Math.min(count, mailbox.exists);
+					searchEmails(count, lastDate || new Date(Date.now() + 1*24*60*60*1000), function(sids, hasMore){
+						var intervals = getIntervals(sids);
+						getEmailsByIntervals(intervals, function(messages){
+							messages.sort((a, b) => new Date(b.envelope.date).valueOf() - new Date(a.envelope.date).valueOf());
+							if (lastDate) {
+								messages = messages.filter(msg => new Date(msg.envelope.date) <= lastDate);
+							}
+							if (count >= 0) {
+								messages = messages.slice(0, count);
+							}
+							success({ messages: messages.map(parseMessage), hasMore: hasMore && count != mailbox.exists });
 						}, error);
-					}
-				});
+					}, error);
+				}
 			});
 		},
 		getNewEmails: function(path, firstDate, success, error) {
 			firstDate = new Date(firstDate.toString());
-			imapLock.take(function() {
-				imap.selectMailbox(utf7.imap.encode(path) || 'Inbox', function(err, mailbox){
-					if (err !== undefined && err !== null) {
-						imapLock.leave();
-						error(err);
+			imap.selectMailbox(utf7.imap.encode(path) || 'Inbox', function(err, mailbox){
+				if (err !== undefined && err !== null) {
+					error(err);
+				} else {
+					selectedFolder = path;
+					if (mailbox.exists == 0) {
+						success([]);
 					} else {
-						if (mailbox.exists == 0) {
-							imapLock.leave();
-							success([]);
-						} else {
-							imap.search({ since: new Date(firstDate - 24*60*60*1000) }, {}, function(err, sids){
-								if (err !== undefined && err !== null) {
-									imapLock.leave();
-									error(err);
-								} else {
-									var intervals = getIntervals(sids);
-									getEmailsByIntervals(intervals, function(messages){
-										imapLock.leave();
-										success(messages.filter(msg => new Date(msg.envelope.date) >= firstDate).map(parseMessage));
-									}, error);
-								}
-							});
-						}
+						imap.search({ since: new Date(firstDate - 24*60*60*1000) }, {}, function(err, sids){
+							if (err !== undefined && err !== null) {
+								error(err);
+							} else {
+								var intervals = getIntervals(sids);
+								getEmailsByIntervals(intervals, function(messages){
+									success(messages.filter(msg => new Date(msg.envelope.date) >= firstDate).map(parseMessage));
+								}, error);
+							}
+						});
 					}
-				});
+				}
 			});
 		},
 		setEmailRead: function(path, uid, success, error) {
-			imapLock.take(function() {
-				selectMailbox(utf7.imap.encode(path), function(){
-					imap.setFlags(uid + ':' + uid, { add: ['\\Seen'] }, { byUid: true }, function(err, result) {
-						imapLock.leave();
-						if (err !== undefined && err !== null) {
-							error(err);
-						}
-						else {
-							success();
-						}
-					});
-				}, function(err){
-					imapLock.leave();
-					error(err);
+			selectMailbox(path, function(){
+				imap.setFlags(uid + ':' + uid, { add: ['\\Seen'] }, { byUid: true }, function(err, result) {
+					if (err !== undefined && err !== null) {
+						error(err);
+					}
+					else {
+						success();
+					}
 				});
+			}, function(err){
+				error(err);
 			});
 		},
 		getEmailAttachment: function(path, uid, part, success, error) {
-			imapLock.take(function() {
-				selectMailbox(utf7.imap.encode(path), function(){
-					imap.listMessages(uid + ':' + uid, ['body['+part+']'], { byUid: true }, function(err, messages) {
-						imapLock.leave();
-						if (err !== undefined && err !== null) {
-							error(err);
-						}
-						else {
-							var body = messages[0]['body['+part+']'];
-							var content = body.replace('\r\n', '');
-							success(content);
-						}
-					});
-				}, function(err){
-					imapLock.leave();
-					error(err);
+			selectMailbox(path, function(){
+				imap.listMessages(uid + ':' + uid, ['body['+part+']'], { byUid: true }, function(err, messages) {
+					if (err !== undefined && err !== null) {
+						error(err);
+					}
+					else {
+						var body = messages[0]['body['+part+']'];
+						var content = body.replace('\r\n', '');
+						success(content);
+					}
 				});
+			}, function(err){
+				error(err);
 			});
 		},
 		deleteEmail: function(path, uid, success, error) {
-			imapLock.take(function(){
-				selectMailbox(utf7.imap.encode(path), function(){
-					imap.deleteMessages(uid + ':' + uid, { byUid: true }, function(err) {
-						imapLock.leave();
-						if (err) {
-							error(err);
-						} else {
-							success();
-						}
-					});
-				}, function(err){
-					imapLock.leave();
-					error(err);
+			selectMailbox(path, function(){
+				imap.deleteMessages(uid + ':' + uid, { byUid: true }, function(err) {
+					if (err) {
+						error(err);
+					} else {
+						success();
+					}
 				});
+			}, function(err){
+				error(err);
 			});
 		},
 		moveEmail: function(path, uid, targetPath, success, error) {
-			imapLock.take(function(){
-				selectMailbox(utf7.imap.encode(path), function(){
-					imap.moveMessages(uid + ':' + uid, utf7.imap.encode(targetPath), { byUid: true }, function(err) {
-						imapLock.leave();
-						if (err) {
-							error(err);
-						} else {
-							success();
-						}
-					});
-				}, function(err){
-					imapLock.leave();
-					error(err);
+			selectMailbox(path, function(){
+				imap.moveMessages(uid + ':' + uid, utf7.imap.encode(targetPath), { byUid: true }, function(err) {
+					if (err) {
+						error(err);
+					} else {
+						success();
+					}
 				});
+			}, function(err){
+				error(err);
 			});
 		},
 		sendEmail: function(message, success, error) {
@@ -300,17 +256,15 @@ function EmailConnection() {
 				}
 			}
 		},
-		close() {
+		close(success, error) {
 			imap.close();
+			success();
 		},
-		getAccount() {
-			return sender;
-		}
 	}
 
 	function selectMailbox(path, success, error) {
 		if (selectedFolder != path) {
-			imap.selectMailbox(path, function(err, mailbox){
+			imap.selectMailbox(utf7.imap.encode(path), function(err, mailbox){
 				if (err) {
 					error(err);
 				} else {
@@ -326,7 +280,6 @@ function EmailConnection() {
 	function searchEmails(count, dateBefore, success, error) {
 		imap.search({ on: dateBefore }, {}, function(err, ssidsOnDate){
 			if (err !== undefined && err !== null) {
-				imapLock.leave();
 				error(err);
 			} else {
 				if (count > 0) {
@@ -336,27 +289,25 @@ function EmailConnection() {
 				}
 			}
 		});
-	}
-
-	function searchOldEmails(count, dateBefore, dateSince, result, success, error) {
-		imap.search({ before: dateBefore, since: dateSince }, {}, function(err, sids){
-			if (err !== undefined && err !== null) {
-				imapLock.leave();
-				error(err);
-			} else {
-				var newResult = result.concat(sids);
-				var ellapsedDays = Math.round((dateBefore - dateSince) / (24*60*60*1000));
-				if (newResult.length >= count || dateSince.valueOf() <= 0) {
-					if (newResult.length <= count*2 || ellapsedDays == 7) {
-						success(newResult, dateSince.valueOf() > 0);
-					} else {
-						searchOldEmails(count, dateBefore, addDays(dateBefore, -7), result, success, error);
-					}
+		function searchOldEmails(count, dateBefore, dateSince, result, success, error) {
+			imap.search({ before: dateBefore, since: dateSince }, {}, function(err, sids){
+				if (err !== undefined && err !== null) {
+					error(err);
 				} else {
-					searchOldEmails(count, dateSince, addDays(dateSince, -ellapsedDays*2), newResult, success, error);
+					var newResult = result.concat(sids);
+					var ellapsedDays = Math.round((dateBefore - dateSince) / (24*60*60*1000));
+					if (newResult.length >= count || dateSince.valueOf() <= 0) {
+						if (newResult.length <= count*2 || ellapsedDays == 7) {
+							success(newResult, dateSince.valueOf() > 0);
+						} else {
+							searchOldEmails(count, dateBefore, addDays(dateBefore, -7), result, success, error);
+						}
+					} else {
+						searchOldEmails(count, dateSince, addDays(dateSince, -ellapsedDays*2), newResult, success, error);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	function getEmailsByIntervals(uids, success, error, result) {
@@ -366,7 +317,6 @@ function EmailConnection() {
 		} else {
 			imap.listMessages(uids[0], ['uid', 'flags', 'envelope', 'bodystructure', 'body.peek[header]', 'body.peek[text]'], {}, function(err, messages){
 				if (err !== undefined && err !== null) {
-					imapLock.leave();
 					error(err);
 				} else {
 					getEmailsByIntervals(uids.slice(1), success, error, result.concat(messages));
