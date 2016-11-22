@@ -1,5 +1,6 @@
-function FetchProcess(store, fs, events, lock, account, EmailConnection, ServerCommands) {
+function FetchProcess(store, fs, events, lock, EmailConnection, ServerCommands) {
     var conn = new EmailConnection();
+    var account;
     var serverCommands = new ServerCommands(conn, store, events);
     var loginTasks = [];
     var extraTasks = [];
@@ -100,6 +101,9 @@ function FetchProcess(store, fs, events, lock, account, EmailConnection, ServerC
                 } else {
                     success();
                 }
+            },
+            getAccount: function() {
+                return credentials.username;
             },
             status: { phase: "login", progress: -1 },
             forbidCancellation: true
@@ -279,6 +283,7 @@ function FetchProcess(store, fs, events, lock, account, EmailConnection, ServerC
         },
         setLoginTask: function(loginTask) {
             loginTasks = [loginTask];
+            account = loginTask.getAccount();
             loginTask.afterExec = function() {
                 loginTasks = [];
             }
@@ -288,6 +293,9 @@ function FetchProcess(store, fs, events, lock, account, EmailConnection, ServerC
             task.afterExec = function() {
                 extraTasks.splice(extraTasks.indexOf(task), 1);
             }
+        },
+        getAccount() {
+            return account;
         },
         LoginTask: LoginTask,
         OldEmailsSynchronizationTask: OldEmailsSynchronizationTask,

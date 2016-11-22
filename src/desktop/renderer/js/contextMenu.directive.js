@@ -1,9 +1,9 @@
 ngApp.directive('contextMenu', ['$app', '$rootScope', function($app, $rootScope){
 
-    var nextId = 0;
-    var handlers = {};
+    var activeContextMenu = null;
+
     ipcRenderer.on('contextMenuClick', function(event, args){
-        handlers[args.id][args.menuId]();
+        activeContextMenu[args.menuId].click();
         $rootScope.$apply();
     });
 
@@ -17,21 +17,10 @@ ngApp.directive('contextMenu', ['$app', '$rootScope', function($app, $rootScope)
             element.on('contextmenu', function(e) {
                 if (scope.contextMenu) {
                     e.preventDefault();
-                    handlers[scope.id] = {};
-                    scope.contextMenu.forEach(function(menu, index){
-                        if (menu.click){
-                            handlers[scope.id][index] = menu.click;
-                        }
-                    });
-                    ipcRenderer.send('openContextMenu', { id: scope.id, menu: scope.contextMenu });
+                    activeContextMenu = scope.contextMenu;
+                    ipcRenderer.send('openContextMenu', { menu: scope.contextMenu });
                 }
             });
-            if (!scope.id) {
-                scope.id = nextId++;
-                scope.$on('$destroy', function() {
-                    delete handlers[scope.id];
-                });
-            }
         }
     }; 
 }]);

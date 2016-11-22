@@ -81,7 +81,7 @@ ipcMain.on('openContextMenu', function(event, arg){
     var template = arg.menu;
     template.forEach(function(menu, index){
         menu.click = function() {
-            event.sender.send('contextMenuClick', { id: arg.id, menuId: index });
+            event.sender.send('contextMenuClick', { menuId: index });
         }
     });
     var contextMenu = Menu.buildFromTemplate(template);

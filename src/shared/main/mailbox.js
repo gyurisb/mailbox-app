@@ -4,7 +4,6 @@ function Mailbox(LockObject, SQLiteSubsystem, FileSubsystem, EmailConnection, Fe
     var fs = new FileSubsystem();
     var store = new EmailStore(SQLiteSubsystem, AccountsTable, ContactsTable, EmailsTable, FoldersTable, QueueTable);
     var fetchProcess;
-    var account;
     var events = {
         folderUpdate: function(){},
         mailboxUpdate: function(){},
@@ -15,7 +14,7 @@ function Mailbox(LockObject, SQLiteSubsystem, FileSubsystem, EmailConnection, Fe
 
     mailbox = {
         login: function(credentials, success, error) {
-            fetchProcess = new FetchProcess(store, fs, events, lock, credentials.username, EmailConnection, ServerCommands);
+            fetchProcess = new FetchProcess(store, fs, events, lock, EmailConnection, ServerCommands);
             fetchProcess.setLoginTask(new fetchProcess.LoginTask(credentials, true));
             fetchProcess.start();
             success();
@@ -29,7 +28,7 @@ function Mailbox(LockObject, SQLiteSubsystem, FileSubsystem, EmailConnection, Fe
                             events.accountUpdate({ type: "account" });
                         } else {
                             events.accountUpdate({ type: "account", email: accounts[0].username });
-                            fetchProcess = new FetchProcess(store, fs, events, lock, accounts[0].username, EmailConnection, ServerCommands);
+                            fetchProcess = new FetchProcess(store, fs, events, lock, EmailConnection, ServerCommands);
                             fetchProcess.setLoginTask(new fetchProcess.LoginTask(accounts[0]));
                             fetchProcess.start();
                         }
@@ -42,10 +41,10 @@ function Mailbox(LockObject, SQLiteSubsystem, FileSubsystem, EmailConnection, Fe
             store.folders.getTree(success);
         },
         createFolder: function(parentId, name, success, error) {
-            store.folders.create(account, parentId, name, function(folder){
+            store.folders.create(fetchProcess.getAccount(), parentId, name, function(folder){
                 if (folder) {
                     events.mailboxUpdate();
-                    store.queue.create('createFolder', account, { path: folder.path }, function(){
+                    store.queue.create('createFolder', fetchProcess.getAccount(), { path: folder.path }, function(){
                         fetchProcess.restart();
                         success();
                     });
@@ -217,7 +216,7 @@ function Mailbox(LockObject, SQLiteSubsystem, FileSubsystem, EmailConnection, Fe
                 });
                 message.uid = uid;
                 message.path = path;
-                store.queue.create('sendEmail', account, message, function(){
+                store.queue.create('sendEmail', fetchProcess.getAccount(), message, function(){
                     fetchProcess.restart();
                     success();
                 });
