@@ -1,23 +1,21 @@
 <div context-menu="contextMenu">
     <div ng-drag="{ folder: folder }">
         <md-list-item ng-class="{'md-selected': folder.id==selected.id, 'md-unseen': folder.unseen > 0}" ng-click="selectFolder()" class="md-list-folder" ng-drop="drop($data)">
-            <div class="md-list-item-text" layout="column">
-                <p ng-if="!state.rename">
-                    {{folder.name}}
-                    <span ng-if="folder.unseen != 0">({{folder.unseen}})</span>
-                    <span ng-if="hasChildren()" style="float: right">
-                        <button ng-if="!state.isClosed" ng-click="close($event)" class="folder-hide-btn">-</button>
-                        <button ng-if="state.isClosed" ng-click="open($event)" class="folder-hide-btn">+</button>
-                    </span>
-                </p>
-                <form ng-if="state.rename" ng-submit="saveRename()">
-                    <input type="text" ng-model="state.rename.value" auto-focus ng-blur="saveRename()" class="edit-folder-control">
-                </form>
-            </div>
+            <p ng-if="!state.rename">
+                {{folder.name}}
+                <span ng-if="folder.unseen != 0">({{folder.unseen}})</span>
+                <span ng-if="hasChildren()" style="float: right">
+                    <a ng-if="!state.isClosed" ng-click="close($event)" class="folder-hide-btn"><md-icon>&#xf0d7;</md-icon></a>
+                    <a ng-if="state.isClosed" ng-click="open($event)" class="folder-hide-btn"><md-icon>&#xf0d9;</md-icon></a>
+                </span>
+            </p>
+            <form ng-if="state.rename" ng-submit="saveRename()">
+                <input type="text" ng-model="state.rename.value" auto-focus ng-blur="saveRename()" class="edit-folder-control">
+            </form>
         </md-list-item>
     </div>
 </div>
-<div ng-if="hasChildren()" ng-style="{ height: (!state.isClosed ? getHeight() : 0) + 'px' }" class="folder-group animate-folder-group">
+<div ng-if="hasChildren()" ng-hide="state.isClosed" class="folder-group">
     <folder ng-repeat="child in folder.children" model="child" states="states" selected="selected">
     </folder>
 </div>

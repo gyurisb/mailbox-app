@@ -4,12 +4,14 @@ html, body {
     width: 100%;
     padding: 0px;
     margin: 0px;
+    background: white;
 }
 
 /* Content style */
 
 md-content {
     height: 100%;
+    background: white;
 }
 
 /* New email button style */
@@ -38,9 +40,8 @@ md-content {
     font-weight: bold !important;
 }
 
-.account-label > span {
+.account-label {
     font-size: 14px;
-    padding: 10px 0px 10px 10px;
     display: block;
     cursor: pointer;
     border-bottom: 1px solid rgba(0,0,0,0.2);
@@ -55,36 +56,17 @@ md-content {
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-.md-list-folder .md-list-item-text {
-    width: 100%;
+.md-list-folder {
+    margin-left: -30px !important;
+    padding-left: 30px !important;
 }
-.md-list-folder .md-button {
-    margin-left: -30px;
-    padding: 0px 16px 0 46px;
+.md-list-folder div.md-button {
+    padding-right: 0 !important;
+    margin-left: -30px !important;
+    padding-left: 46px !important;
 }
-.folder-hide-btn {
-    border: 1px solid #A0A0A0;
-    color: #A0A0A0;
-    border-radius: 3px;
-    background: transparent;
-}
-.animate-folder-group {
-    -webkit-transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
-    -webkit-transition-property: height;
-    -moz-transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
-    -moz-transition-property: height;
-    transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
-    transition-property: height;
-    overflow: hidden;
-}
-/*.animate-folder-group.ng-enter, .animate-folder-group.ng-leave.ng-leave-active {
-  max-height: 0px;
-}
-.animate-folder-group.ng-enter.ng-enter-active, .animate-folder-group.ng-leave {
-  max-height: 1000px;
-}*/
 
-/* Email list element style */
+/*Emails style*/
 
 .email-from {
     overflow: hidden;
@@ -93,8 +75,24 @@ md-content {
     display: inline-block;
     max-width: calc(100% - 65px);
 }
+.email-subject {
+    color: black;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 .email-date {
     float: right;
+}
+.email-from, .email-date {
+    color: rgba(0,0,0,0.54);
+}
+.md-list-email-content {
+    width: 100%;
+}
+.md-list-email-content p {
+    line-height: initial;
+    margin: 0;
 }
 
 /* New email page (new.html) */

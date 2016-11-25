@@ -1,10 +1,7 @@
 <div ng-controller="FoldersController" class="folders">
     <div ng-drop="dropFolderOnRoot($data)">
-        <div context-menu="accountMenu">
-            <md-menu class="account-label">
-                <span>{{emailAddress}}</span>
-                <md-menu-content width="4" hidden></md-menu-content>
-            </md-menu>
+        <div context-menu="accountMenu" class="account-label">
+            {{emailAddress}}
         </div>
     </div>
     <div class="folders-flex">

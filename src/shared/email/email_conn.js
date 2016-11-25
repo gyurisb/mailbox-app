@@ -256,7 +256,7 @@ function EmailConnection() {
 				}
 			}
 		},
-		close(success, error) {
+		close: function(success, error) {
 			imap.close();
 			success();
 		},

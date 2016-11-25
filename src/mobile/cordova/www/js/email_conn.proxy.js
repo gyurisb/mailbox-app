@@ -1,12 +1,14 @@
-// var backendHostName = "https://email-globaltransit.rhcloud.com";
-var backendHostName = "http://192.168.0.15";
-
 function EmailConnectionProxy() {
     var token;
+    var serverUrl;
 
     var proxy = {};
     Generated.emailActions.forEach(function(action){
         proxy[action] = function() {
+            if (action == "login") {
+                var credentials = arguments[0];
+                serverUrl = credentials.serverUrl;
+            }
             var args = Array.prototype.slice.call(arguments);
             var params = args.slice(0, -2);
             var success = args.slice(-2)[0];
@@ -17,7 +19,7 @@ function EmailConnectionProxy() {
     return proxy;
 
     function request(method, action, data, saveToken, success, error) {
-        $.ajax(backendHostName + '/' + action, {
+        $.ajax("http://" + serverUrl + '/' + action, {
            method: method,
            headers: {
                 'Content-Type': 'application/json',

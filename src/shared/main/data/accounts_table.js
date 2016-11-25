@@ -8,14 +8,15 @@ function AccountsTable(store, db) {
                             imapHost TEXT NOT NULL, \
                             imapPort INTEGER NOT NULL, \
                             smtpHost TEXT NOT NULL, \
-                            smtpPort INTEGER NOT NULL \
+                            smtpPort INTEGER NOT NULL, \
+                            serverUrl TEXT \
                         )",
 
         list: function(success) {
             db.all("SELECT * FROM accounts", [], success);
         },
         create: function(args, success) {
-            db.run("INSERT INTO accounts (username, password, imapHost, imapPort, smtpHost, smtpPort) VALUES (?, ?, ?, ?, ?, ?)", [args.username, args.password, args.imapHost, args.imapPort, args.smtpHost, args.smtpPort], success);
+            db.run("INSERT INTO accounts (username, password, imapHost, imapPort, smtpHost, smtpPort, serverUrl) VALUES (?, ?, ?, ?, ?, ?, ?)", [args.username, args.password, args.imapHost, args.imapPort, args.smtpHost, args.smtpPort, args.serverUrl], success);
         },
     }
 }

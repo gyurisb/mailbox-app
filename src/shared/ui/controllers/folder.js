@@ -47,6 +47,8 @@ ngApp.directive('folder', ['$mailbox', '$app', function($mailbox, $app){
                             scope.state.rename = null;
                             alert(JSON.stringify(err));
                         });
+                    } else {
+                        scope.state.rename = null;
                     }
                } else {
                     alert("Empty names and the following characters are not allowed: " + scope.folder.delimiter);

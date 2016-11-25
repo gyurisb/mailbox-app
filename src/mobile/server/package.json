@@ -1,14 +1,13 @@
 {
-  "name": "openshift-cartridge-nodejs-template",
-  "version": "1.0.1",
-  "description": "Custom Node.js cartridge for OpenShift - sample application",
-  "private": true,
-  "main": "start.js",
+  "name": "MailboxExplorer",
+  "version": "1.0.0",
+  "description": "An e-mail client application",
+  "main": "app.js",
   "scripts": {
-    "start": "node --use_strict start.js"
+    "start": "node --use_strict app.js"
   },
-  "author": "Ionut-Cristian Florescu <ionut.florescu@gmail.com>",
-  "license": "ISC",
+  "author": "Gyuris Bence",
+  "license": "CC0-1.0",
   "dependencies": {
     "body-parser": "1.15.0",
     "express": "4.13.4",

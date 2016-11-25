@@ -3,27 +3,31 @@
   <head>
     <meta charset="UTF-8">
     <title>New account</title>
+    <link rel="stylesheet" href="node_modules/angular-material/angular-material.min.css">
+    <link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.min.css">
+    <script src="node_modules/tinymce/tinymce.min.js"></script>
     <script>
+        const $ = require('jQuery');
         require('angular');
         require('angular-aria');
         require('angular-animate');
         require('angular-material');
+        require('angular-ui-tinymce');
         const ipcRenderer = require('electron').ipcRenderer;
         const remote = require('remote');
+        const dialog = remote.require('dialog');
+        const path = require('path');
+        const fs = require('fs');
     </script>
-    <script src="lib/jquery.min.js"></script>
-    <script src="lib/tinymce/tinymce.min.js"></script>
-    <script src="lib/angular/angular-ui-tinymce.min.js"></script>
+
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/style-desktop.css">
     <script src="js/index.js"></script>
     <script src="js/app.js"></script>
     <script src="js/master.service.js"></script>
     <script src="js/app.service.js"></script>
     <script src="js/mailbox.service.js"></script>
     <script src="controllers/login.js"></script>
-    <link rel="stylesheet" href="styles/style.css">
-    <link rel="stylesheet" href="styles/style-desktop.css">
-    <link rel="stylesheet" href="lib/css/angular-material.css">
-    <link rel="stylesheet" href="lib/css/font-awesome.min.css">
   </head>
   <body ng-app="emailApp" login>
   </body>

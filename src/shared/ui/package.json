@@ -1,0 +1,14 @@
+{
+  "name": "MailboxExplorer",
+  "version": "1.0.0",
+  "description": "An e-mail client application",
+  "dependencies": {
+    "angular": "1.5.3",
+    "angular-material": "1.1.0",
+    "angular-messages": "1.5.9",
+    "angular-ui-tinymce": "0.0.17",
+    "font-awesome": "4.6.1",
+    "jquery": "1.12.2",
+    "tinymce": "4.3.10"
+  }
+}

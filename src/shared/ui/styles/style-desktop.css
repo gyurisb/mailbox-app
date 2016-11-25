@@ -15,13 +15,13 @@ body {
     display: flex;
 }
 
-md-list-item.md-selected {
-    background: #d2d2d2;
-}
-
 .login-btn {
     margin-top: 40px !important;
     float: right;
+}
+
+.utf-icon {
+    display: none;
 }
 
 /*Reader style*/
@@ -102,33 +102,38 @@ reader {
   background-color: darkgrey;
 }
 .account-label {
-    padding: 0px !important;
+    padding: 10px 0px 0px 10px;
+    height: 26px;
+    font-size: 14px;
+}
+.md-list-folder.md-selected {
+    background: lightgray;
 }
 .md-list-folder {
-    line-height: normal;
     font-size: 14px;
-    margin: 0px;
     min-height: 0px;
-    max-height: 36px;
-}
-.md-list-folder .md-list-item-inner {
-    min-height: 0px;
-}
-.md-list-folder p {
+    height: 30px;
     line-height: normal;
-    font-size: 14px;
-    margin: 5px 0px;
+}
+.md-list-folder .md-button {
+    min-height: 0px;
 }
 .folder-group {
     padding-left: 10px;
 }
 
 .edit-folder-control {
+    position: relative;
+    z-index: 1;
     width: 150px;
 }
 .new-folder-form {
     padding: 5px;
     padding-left: 15px;
+}
+.folder-hide-btn {
+    position: relative;
+    z-index: 1;
 }
 
 /* Email menu styles */
@@ -149,20 +154,23 @@ reader {
 }
 .md-list-email > * {
     flex: 1;
+    position: relative;
+}
+.md-list-email > * > * {
+    position: absolute !important;
+    height: 100% !important;
+}
+.md-list-email .md-selected {
+    background: #d1e8ff;
+}
+.email-from, .email-date {
+    font-size: 14px;
+    margin-bottom: 5px;
 }
 .emails-footer {
     align-items: center;
     margin-left: auto;
     margin-right: auto;
-}
-p.email-subject {
-    color: black;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.md-list-email md-list-item.md-2-line, .md-list-email md-list-item.md-2-line button, .md-list-email-padding {
-    min-height: 58px;
 }
 .md-list-email {
     padding: 0px;
@@ -172,6 +180,13 @@ p.email-subject {
     bottom: 0;
     left: 0;
     width: 100%;
+}
+.emails-footer md-icon {
+    height: 13px;
+    min-height: 0;
+}
+.md-list-email-padding {
+    height: 48px;
 }
 
 /* New email */

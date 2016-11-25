@@ -34,22 +34,20 @@
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
         <meta http-equiv="Content-Security-Policy" content="default-src *; style-src * 'self' 'unsafe-inline' 'unsafe-eval'; script-src * 'self' 'unsafe-inline' 'unsafe-eval';">
         
+        <script type="text/javascript" src="lib/winstore-jscompat.js"></script>
+        <link rel="stylesheet" href="node_modules/angular-material/angular-material.min.css">
+        <link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.min.css">
+        <script src="node_modules/jquery/dist/jquery.min.js"></script>
+        <script src="node_modules/tinymce/tinymce.min.js"></script>
+        <script src="node_modules/angular/angular.min.js"></script>
+        <script src="node_modules/angular-aria/angular-aria.min.js"></script>
+        <script src="node_modules/angular-animate/angular-animate.min.js"></script>
+        <script src="node_modules/angular-messages/angular-messages.min.js"></script>
+        <script src="node_modules/angular-material/angular-material.min.js"></script>
+        <script src="node_modules/angular-ui-tinymce/dist/tinymce.min.js"></script>
+        
         <link rel="stylesheet" type="text/css" href="styles/style.css">
         <link rel="stylesheet" type="text/css" href="styles/style-mobile.css">
-        <link rel="stylesheet" type="text/css" href="lib/css/angular-material.min.css">
-        <link rel="stylesheet" type="text/css" href="lib/css/font-awesome.min.css">
-        
-        <script type="text/javascript" src="lib/winstore-jscompat.js"></script>
-        <script type="text/javascript" src="lib/jquery.min.js"></script>
-        <script type="text/javascript" src="lib/jquery-ui.min.js"></script>
-        <script type="text/javascript" src="lib/angular/angular.min.js"></script>
-        <script type="text/javascript" src="lib/angular/angular-aria.min.js"></script>
-        <script type="text/javascript" src="lib/angular/angular-animate.min.js"></script>
-        <script type="text/javascript" src="lib/angular/angular-messages.min.js"></script>
-        <script type="text/javascript" src="lib/angular/angular-material.min.js"></script>
-        <script type="text/javascript" src="lib/tinymce/tinymce.min.js"></script>
-        <script type="text/javascript" src="lib/angular/angular-ui-tinymce.min.js"></script>
-        
         <script type="text/javascript" src="js/index.js"></script>
         <script type="text/javascript" src="js/email_conn.proxy.js"></script>
         <script type="text/javascript" src="js/mailbox.js"></script>
@@ -67,7 +65,6 @@
         <script type="text/javascript" src="js/master.service.js"></script>
         <script type="text/javascript" src="js/app.service.js"></script>
         <script type="text/javascript" src="js/mailbox.service.js"></script>
-        
         <script type="text/javascript" src="controllers/main.js"></script>
         <script type="text/javascript" src="controllers/login.js"></script>
         <script type="text/javascript" src="controllers/folders.js"></script>
@@ -83,7 +80,7 @@
     <body ng-app="emailApp" ng-cloak ng-controller="MainController">
         <div class="app">
             <div class="header">
-                <div ng-click="back()" class="header-back">&larr;</div>
+                <md-button ng-click="back()" class="md-icon-button header-back">&larr;</md-button>
                 <div class="header-title">{{title}}</div>
                 <status-bar></status-bar>
             </div>

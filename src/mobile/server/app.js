@@ -26,7 +26,7 @@ app.post('/login', function (req, res) {
     conn.login(req.body[0], function(){
         if (accounts[username] !== undefined) {
             var oldToken = accounts[username];
-            sessions[oldToken].conn.close();
+            sessions[oldToken].conn.close(function(){}, function(){});
             delete sessions[oldToken];
         }
         var token = createToken();

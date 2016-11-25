@@ -294,7 +294,7 @@ function FetchProcess(store, fs, events, lock, EmailConnection, ServerCommands) 
                 extraTasks.splice(extraTasks.indexOf(task), 1);
             }
         },
-        getAccount() {
+        getAccount: function() {
             return account;
         },
         LoginTask: LoginTask,

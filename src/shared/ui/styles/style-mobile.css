@@ -56,6 +56,13 @@ iframe {
     height: 100% !important;
 }
 
+md-icon {
+    display: none !important;
+}
+.utf-icon {
+    font-size: 30px;
+}
+
 /* Common things */
 
 #login-area input, #login-area button {
@@ -91,13 +98,19 @@ iframe {
     float: right;
 }
 
+.new-email-btn md-icon {
+    display: none;
+}
+
 /* Folder list styles */
 
 .folders-flex {
-    height: calc(100% - 50px - 39px);
+    height: calc(100% - 50px - 50px);
     overflow: auto;
 }
-.account-label > span {
+.account-label {
+    padding: 15px 0px 0px 10px;
+    height: 34px;
     font-size: 16px;
 }
 .md-list-folder {
@@ -113,6 +126,11 @@ iframe {
 }
 
 /* Email list style */
+
+.email-from, .email-date {
+    font-size: 15px;
+    margin-bottom: 10px;
+}
 
 .emails-footer {
     position: fixed;
@@ -130,6 +148,10 @@ iframe {
     top: 60px;
     left: 0;
     width: 100%;
+}
+
+.md-list-email-content {
+    padding: 15px 0px;
 }
 
 /* Reader style */
@@ -155,11 +177,12 @@ iframe {
     box-shadow: 0 1px 3px #888888;
 }
 .header-back {
-    display: inline-block;
-    cursor: pointer;
     position: absolute;
     font-weight: bold;
-    padding: 19px 15px;
+    height: 60px !important;
+    width: 60px !important;
+    position: relative !important;
+    z-index: 1;
     font-size: 21px;
 }
 .header-title {    

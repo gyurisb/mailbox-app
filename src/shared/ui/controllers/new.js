@@ -15,7 +15,7 @@ ngApp.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$time
         menubar: false,
         statusbar: false,
         toolbar: 'insertfile undo redo | styleselect | fontselect fontsizeselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
-        content_css: 'css/style-email.css'
+        content_css: 'styles/style-email.css'
     };
 
     $app.onEmailParameters(function(params){

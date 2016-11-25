@@ -82,7 +82,7 @@ ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '
 
     function setEmailListHeight() {
         var height = $window.innerHeight - (platform == 'desktop' ? (15 + 40) : (24 + 2*8 + 60));
-        var minItemHeight = (platform == 'desktop' ? 58 : 72);
+        var minItemHeight = (platform == 'desktop' ? 59 : 79);
         $scope.itemCount = Math.floor(height / minItemHeight);
     }
 

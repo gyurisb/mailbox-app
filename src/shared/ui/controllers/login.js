@@ -2,6 +2,9 @@ ngApp.controller('LoginController', ['$scope', '$location', '$app', '$mailbox', 
     
     $scope.account = {};
     $scope.loginInProgress = false;
+    if (platform == "mobile") {
+        $scope.serverUrlEnabled = true;
+    }
     
     $scope.account = {
         username: "gyuris.bence@hotmail.com",
@@ -9,7 +12,8 @@ ngApp.controller('LoginController', ['$scope', '$location', '$app', '$mailbox', 
         imapHost: "imap-mail.outlook.com",
         imapPort: 993,
         smtpHost: "smtp.live.com",
-        smtpPort: 587
+        smtpPort: 587,
+        serverUrl: "192.168.0.15"
     }
     
     $scope.login = function() {
