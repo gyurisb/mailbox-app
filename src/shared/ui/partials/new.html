@@ -1,74 +1,72 @@
 <div class="new-email" ng-controller="NewController" page>
-    <md-content style="height: 100%">
-        <table style="padding: 0px 5px">
-            <tr>
-                <td style="width: 100%">
-                    <md-contact-chips
-                        ng-model="to" 
-                        placeholder="To" 
-                        secondary-placeholder="+Cc" 
-                        md-contacts="querySearch($query)"
-                        md-contact-name="name"
-                        md-contact-email="email"
-                        md-require-match="true"
-                        md-highlight-flags="i"
-                        filter-selected="true"
-                        md-require-match="true"
-                        ng-class="{'chips-with-icon': !showBcc}">
-                    </md-contact-chips>
-                </td>
-                <td>
-                    <md-button ng-if="!showBcc" class="md-primary btn-bcc" ng-click="showBccInput()">
-                        +Bcc
-                    </md-button>
-                </td>
-            </tr>
-            <tr ng-if="showBcc">
-                <td>
-                    <md-contact-chips
-                        ng-model="toBcc" 
-                        placeholder="Bcc" 
-                        secondary-placeholder="+Bcc"
-                        md-contacts="querySearch($query)"
-                        md-contact-name="name"
-                        md-contact-email="email"
-                        md-require-match="true"
-                        md-highlight-flags="i"
-                        filter-selected="true"
-                        md-require-match="true">
-                    </md-contact-chips>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <md-input-container md-no-float class="md-block envelope-input subject-input">
-                        <input type="text" ng-model="subject" placeholder="Subject">
-                    </md-input-container>
-                </td>
-            </tr>
-            <tr style="height: 100%">
-                <td style="height: 100%" colspan="2">
-                    <textarea ng-if="allowFormatting" ui-tinymce="tinymceOptions" ng-model="message.body" class="new-email-text" hidden></textarea>
-                    <textarea ng-if="!allowFormatting" ng-model="message.body" class="new-email-text"></textarea>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <div ng-repeat="attachment in attachments" class="new-attachment">
-                        {{attachment.name}} ({{attachment.size | bytes}})
-                        <button ng-click="removeAttachment(attachment)">&#x2716;</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <md-button ng-click="send()" ng-disabled="isSending">Send</md-button>
-                    <md-button ng-click="attach()" class="md-primary btn-attach" style="float: right;">
-                        Attach files
-                        <md-icon>&#xf0c6;</md-icon>
-                    </md-button>
-                </td>
-            </tr>
-        </table>
-    </md-content>
+    <table style="padding: 0px 5px">
+        <tr>
+            <td style="width: 100%">
+                <md-contact-chips
+                    ng-model="to" 
+                    placeholder="To" 
+                    secondary-placeholder="+Cc" 
+                    md-contacts="querySearch($query)"
+                    md-contact-name="name"
+                    md-contact-email="email"
+                    md-require-match="true"
+                    md-highlight-flags="i"
+                    filter-selected="true"
+                    md-require-match="true"
+                    ng-class="{'chips-with-icon': !showBcc}">
+                </md-contact-chips>
+            </td>
+            <td>
+                <md-button ng-if="!showBcc" class="md-primary btn-bcc" ng-click="showBccInput()">
+                    +Bcc
+                </md-button>
+            </td>
+        </tr>
+        <tr ng-if="showBcc">
+            <td>
+                <md-contact-chips
+                    ng-model="toBcc" 
+                    placeholder="Bcc" 
+                    secondary-placeholder="+Bcc"
+                    md-contacts="querySearch($query)"
+                    md-contact-name="name"
+                    md-contact-email="email"
+                    md-require-match="true"
+                    md-highlight-flags="i"
+                    filter-selected="true"
+                    md-require-match="true">
+                </md-contact-chips>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <md-input-container md-no-float class="md-block envelope-input subject-input">
+                    <input type="text" ng-model="subject" placeholder="Subject">
+                </md-input-container>
+            </td>
+        </tr>
+        <tr class="new-main-tr">
+            <td colspan="2">
+                <textarea ng-if="allowFormatting" ui-tinymce="tinymceOptions" ng-model="message.body" class="new-email-text" hidden></textarea>
+                <div ng-if="!allowFormatting" ng-model="message.body" ng-content-editable class="new-email-text"></div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <div ng-repeat="attachment in attachments" class="new-attachment">
+                    {{attachment.name}} ({{attachment.size | bytes}})
+                    <button ng-click="removeAttachment(attachment)">&#x2716;</button>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <md-button ng-click="send()" ng-disabled="isSending" class="action-btn">Send</md-button>
+                <md-button ng-click="attach()" class="md-primary btn-attach" style="float: right;">
+                    Attach files
+                    <md-icon>&#xf0c6;</md-icon>
+                </md-button>
+            </td>
+        </tr>
+    </table>
 </div>

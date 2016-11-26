@@ -1,6 +1,9 @@
 ngApp.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$timeout', '$app', function($scope, $mailbox, $master, $q, $timeout, $app) {
 
     var replyToId = null;
+    if ($scope.titles) {
+        $scope.titles[4] = "New email";
+    }
     $scope.allowFormatting = (platform == "desktop");
     $scope.tinymceOptions = {
         onChange: function(e) {
@@ -24,6 +27,7 @@ ngApp.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$time
         $scope.subject = "";
         $scope.message = { body: "" };
         $scope.attachments = [];
+        replyToId = null;
         if (params.replyTo) {
             replyToId = params.replyTo.id;
             if (params.forward) {
@@ -37,9 +41,9 @@ ngApp.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$time
                     $scope.to = $scope.to.concat(ccTo);
                 }
             }
-            $scope.trailer = createTrailer(new Date(params.replyTo.date), params.replyTo.senderName, params.replyTo.senderEmail, params.replyTo.body);
+            $scope.message.trailer = createTrailer(new Date(params.replyTo.date), params.replyTo.senderName, params.replyTo.senderEmail, params.replyTo.body);
             if ($scope.allowFormatting) {
-                $scope.message.body = "<br><br>" + $scope.trailer;
+                $scope.message.body = "<br><br>" + $scope.message.trailer;
             }
         }
     });
@@ -59,12 +63,8 @@ ngApp.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$time
     $scope.send = function() {
         $scope.isSending = true;
         var body = $scope.message.body;
-        if (!$scope.allowFormatting) {
-            //TODO HTML encoding
-            body = body.replace(/\n/g, '<br/>');
-            if ($scope.trailer) {
-                body = body + "<br><br>" + $scope.trailer;
-            }
+        if (!$scope.allowFormatting && $scope.message.trailer) {
+            body = body + "<br><br>" + $scope.message.trailer;
         }
         $mailbox.sendEmail({
             to: $scope.to.map(function(c) { return c.email; }),

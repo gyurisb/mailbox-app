@@ -136,6 +136,26 @@ reader {
     z-index: 1;
 }
 
+/* New email button style */
+
+.new-email-btn {
+    width: 100% !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    text-align: left !important;
+    border-top: 1px solid rgba(0,0,0,.2) !important;
+}
+.new-email-btn md-icon {    
+    float: right;
+    position: relative;
+    top: 12px;
+    right: 10px;
+}
+.new-email-btn span {
+    text-transform: initial;
+    padding-left: 15px;
+}
+
 /* Email menu styles */
 .emails-nav {
     overflow: hidden;
@@ -234,4 +254,10 @@ md-virtual-repeat-container {
     border: 0;
     background-color: transparent;
     color: #676767;
+}
+.new-main-tr, .new-main-tr > td {
+    height: 100%;
+}
+.new-email table {
+    height: 100%;
 }

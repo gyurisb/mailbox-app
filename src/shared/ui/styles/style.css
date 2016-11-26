@@ -14,29 +14,9 @@ md-content {
     background: white;
 }
 
-/* New email button style */
-
-.new-email-btn {
-    width: 100% !important;
-    margin: 0px !important;
-    padding: 0px !important;
-    text-align: left !important;
-    border-top: 1px solid rgba(0,0,0,.2) !important;
-}
-.new-email-btn md-icon {    
-    float: right;
-    position: relative;
-    top: 12px;
-    right: 10px;
-}
-.new-email-btn span {
-    text-transform: initial;
-    padding-left: 15px;
-}
-
 /* Folders style */
 
-.md-unseen p, .md-unseen h3 {
+.md-unseen * {
     font-weight: bold !important;
 }
 
@@ -131,11 +111,9 @@ md-content {
     margin-bottom: -10px;
 }
 
-/*New email old */
 .new-email table {
     padding: 0px;
     margin: 0px;
-    height: 100%;
     width: 100%;
 }
 .new-email tr {

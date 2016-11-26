@@ -26,6 +26,7 @@ ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '
     
     $app.onFolderFocus(function(folder) {
         if (platform == 'mobile' || folder.id != $scope.folderId) {
+            $scope.titles[1] = folder.name;
             $scope.page = 0;
             loadEmails(folder.id);
         }
@@ -38,11 +39,15 @@ ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '
     });
     
     $app.onRestore(function(){
-        $mailbox.getFolders().success(foldersLoaded);
+        if (platform == 'desktop') {
+            $mailbox.getFolders().success(foldersLoaded);
+        }
     });
     
     $mailbox.onMailboxUpdate(function(){
-        $mailbox.getFolders().success(foldersLoaded);
+        if (platform == 'desktop') {
+            $mailbox.getFolders().success(foldersLoaded);
+        }
     });
 
     $app.onEmailModify(function(emailId){
@@ -82,7 +87,7 @@ ngApp.controller('EmailsController', ['$scope', '$mailbox', '$app', '$master', '
 
     function setEmailListHeight() {
         var height = $window.innerHeight - (platform == 'desktop' ? (15 + 40) : (24 + 2*8 + 60));
-        var minItemHeight = (platform == 'desktop' ? 59 : 79);
+        var minItemHeight = (platform == 'desktop' ? 59 : 75);
         $scope.itemCount = Math.floor(height / minItemHeight);
     }
 

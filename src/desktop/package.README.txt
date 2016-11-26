@@ -1,5 +1,0 @@
-required environment:
-Node.js v4.4.4
-npm v2.15.11
-Pyhton 2.7.11
-Visual Studio 2015 with C++ tools

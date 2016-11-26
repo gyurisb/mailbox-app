@@ -16,9 +16,8 @@ var EmailConnection = require('./src/shared/email/email_conn.js');
 
 gulp.task('clean_source', function() {
     return del(['dist/**'].concat(delExcept([
-        'dist/installers/**',
+        'dist/bin/**',
         'dist/desktop/node_modules/**',
-        'dist/desktop/packages/**',
         'dist/desktop/renderer/node_modules/**', 
         'dist/mobile/cordova/plugins/**', 
         'dist/mobile/cordova/platforms/**',
@@ -58,22 +57,22 @@ gulp.task('build_source_ui', ['clean_source'], function(){
 })
 gulp.task('build_source', ['build_source_desktop', 'build_source_mobile', 'build_source_email', 'build_source_main', 'build_source_ui'])
 
-gulp.task('install_packages_desktop', ['build_source'], function(){
+gulp.task('install_packages_desktop', ['build_source_desktop'], function(){
     return gulp.src('dist/desktop/package.json')
         .pipe(discardIfExists('dist/desktop/node_modules'))
         .pipe(install());
 })
-gulp.task('install_packages_server', ['build_source'], function(){
+gulp.task('install_packages_server', ['build_source_mobile'], function(){
     return gulp.src('dist/mobile/server/package.json')
         .pipe(discardIfExists('dist/mobile/server/node_modules'))
         .pipe(install());
 })
-gulp.task('install_packages_desktop_ui', ['build_source'], function(){
+gulp.task('install_packages_desktop_ui', ['build_source_ui'], function(){
     return gulp.src('dist/desktop/renderer/package.json')
         .pipe(discardIfExists('dist/desktop/renderer/node_modules'))
         .pipe(install());
 })
-gulp.task('install_packages_mobile_ui', ['build_source'], function(){
+gulp.task('install_packages_mobile_ui', ['build_source_ui'], function(){
     return gulp.src('dist/mobile/cordova/www/package.json')
         .pipe(discardIfExists('dist/mobile/cordova/www/node_modules'))
         .pipe(install());
@@ -119,7 +118,7 @@ gulp.task('minimize_packages_mobile_ui', ['install_packages_mobile_ui'], functio
     ])));
 });
 
-gulp.task('prepare_cordova', ['build_source'], function(){
+gulp.task('prepare_cordova', ['build_source_mobile'], function(){
     return gulp.src('dist/mobile/cordova')
         .pipe(discardIfExists('dist/mobile/cordova/platforms'))
         .pipe(shell('cordova prepare', { cwd: '<%= file.path %>' }))
@@ -130,7 +129,7 @@ gulp.task('build', ['build_source', 'prepare_cordova', 'install_packages', 'rebu
 gulp.task('bundle_electron_package', ['build'], function(done){
     electronPackager({
         dir: 'dist/desktop',
-        out: 'dist/desktop/packages',
+        out: 'dist/bin/portable',
         platform: 'win32',
         arch: 'x64'
     }, function(err, appPaths){
@@ -141,8 +140,8 @@ gulp.task('bundle_electron_package', ['build'], function(done){
 
 gulp.task('bundle_windows', ['bundle_electron_package'], function(done){
 	electronInstaller.createWindowsInstaller({
-		appDirectory: 'dist/desktop/packages/MailboxExplorer-win32-x64',
-		outputDirectory: 'dist/installers/win32-x64',
+		appDirectory: 'dist/bin/portable/MailboxExplorer-win32-x64',
+		outputDirectory: 'dist/bin/win32-x64',
 		authors: 'Gyuris Bence',
 		noMsi: true
 	}).then(() => done(), (e) => done(e));
@@ -155,7 +154,7 @@ gulp.task('cordova_build_wp8', ['build'], function(){
 
 gulp.task('bundle_wp8', ['cordova_build_wp8'], function(){
     return gulp.src('dist/mobile/cordova/platforms/wp8/Bin/Release/CordovaAppProj_Release_AnyCPU.xap')
-        .pipe(gulp.dest('dist/installers/wp8'))
+        .pipe(gulp.dest('dist/bin/wp8'))
 });
 
 gulp.task('cordova_build_android', ['build'], function(){
@@ -165,7 +164,7 @@ gulp.task('cordova_build_android', ['build'], function(){
 
 gulp.task('bundle_android', ['cordova_build_android'], function(){
     return gulp.src('dist/mobile/cordova/platforms/android/build/outputs/apk/android-release-unsigned.apk')
-        .pipe(gulp.dest('dist/installers/android'))
+        .pipe(gulp.dest('dist/bin/android'))
 });
 
 gulp.task('bundle', ['bundle_windows', 'bundle_wp8', 'bundle_android']);

@@ -88,10 +88,14 @@ function FetchProcess(store, fs, events, lock, EmailConnection, ServerCommands) 
             operation: function(args, success, error) {
                 conn.login(credentials, function() {
                     events.accountUpdate({ type: "account", email: credentials.username });
-                    events.loginFinish({});
+                    if (firstLogin) {
+                        events.loginFinish({});
+                    }
                     success();
                 }, function(err){
-                    events.loginFinish({ error: err });
+                    if (firstLogin) {
+                        events.loginFinish({ error: err });
+                    }
                     error(err);
                 });
             },

@@ -2,7 +2,7 @@ ngApp.controller('MainController', ['$scope', '$app', '$master', '$mailbox', fun
     
     mainScope = $scope;
     $master.setScope($scope);
-    $scope.title = "Mailbox";
+    $scope.titles = {};
     $scope.loggedIn = false;
     $scope.folderInProgress = {};
 

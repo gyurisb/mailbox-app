@@ -80,8 +80,8 @@
     <body ng-app="emailApp" ng-cloak ng-controller="MainController">
         <div class="app">
             <div class="header">
-                <md-button ng-click="back()" class="md-icon-button header-back">&larr;</md-button>
-                <div class="header-title">{{title}}</div>
+                <md-button ng-if="path != 0" ng-click="back()" class="md-icon-button header-back">&larr;</md-button>
+                <div class="header-title">{{titles[path]}}</div>
                 <status-bar></status-bar>
             </div>
             <div class="body">

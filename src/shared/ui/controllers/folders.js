@@ -3,6 +3,7 @@ ngApp.controller('FoldersController', ['$scope', '$mailbox', '$app', '$master', 
     $scope.selected = { id: null };
     $scope.new = null;
     $scope.folderStates = {};
+    $scope.titles[0] = "Mailbox";
 
     $scope.accountMenu = [
         {

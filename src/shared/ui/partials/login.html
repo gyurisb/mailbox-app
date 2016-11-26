@@ -1,5 +1,5 @@
 <div ng-controller="LoginController" page>
-    <md-content class="login-content">
+    <div class="login-content">
         <form ng-submit="login()" novalidate>
             <md-input-container class="md-block" flex-gt-sm>
                 <label>Username</label>
@@ -36,7 +36,7 @@
                 <input type="text" ng-model="account.serverUrl">
                 <div class="hint">for beta version, eg. 192.168.0.15</div>
             </md-input-container>
-            <md-button type="submit" class="login-btn" ng-disabled="loginInProgress">Login</md-button>
+            <md-button type="submit" class="action-btn login-btn" ng-disabled="loginInProgress">Login</md-button>
         </form>
-    </md-content>
+    </div>
 </div>

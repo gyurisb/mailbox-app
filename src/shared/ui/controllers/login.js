@@ -1,19 +1,12 @@
 ngApp.controller('LoginController', ['$scope', '$location', '$app', '$mailbox', function($scope, $location, $app, $mailbox) {
     
+    if ($scope.titles) {
+        $scope.titles[3] = "New account"
+    }
     $scope.account = {};
     $scope.loginInProgress = false;
     if (platform == "mobile") {
         $scope.serverUrlEnabled = true;
-    }
-    
-    $scope.account = {
-        username: "gyuris.bence@hotmail.com",
-        password: "asdasd",
-        imapHost: "imap-mail.outlook.com",
-        imapPort: 993,
-        smtpHost: "smtp.live.com",
-        smtpPort: 587,
-        serverUrl: "192.168.0.15"
     }
     
     $scope.login = function() {

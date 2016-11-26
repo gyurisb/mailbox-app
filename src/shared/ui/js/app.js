@@ -78,3 +78,44 @@ ngApp.directive('autoFocus', function(){
         }
     }
 })
+
+ngApp.directive('ngContentEditable', function(){
+    return {
+        restrict: 'A',
+        scope: {
+            ngModel: '=',
+        },
+        require: 'ngModel',
+        link: function(scope, element, attrs, ngModelCtrl) {
+            element.attr('contenteditable', true)
+            ngModelCtrl.$formatters.push(function(value){
+                element.html(value);
+            });
+            element.on('blur keyup paste copy cut delete mouseup', function() {
+                scope.$apply(function(){
+                    var value = element.html();
+                    ngModelCtrl.$modelValue = value;
+                    scope.ngModel = value;
+                })
+            })
+        }
+    }
+});
+
+ngApp.directive('actionButtons', ['$timeout', function($timeout){
+    return {
+        restrict: 'A',
+        link: function(scope, element) {
+            element.attr('tabindex', 1);
+            element.addClass('action-buttons');
+            element.on('click', function(){
+                element.toggleClass('action-buttons-active')
+            })
+            element.on('blur', function(){
+                $timeout(function(){
+                    element.removeClass('action-buttons-active')
+                }, 100);
+            })
+        }
+    }
+}])

@@ -3,23 +3,28 @@
         <md-progress-linear ng-if="downloadsInProgress[email.id]" md-mode="query"></md-progress-linear>
         <md-card-content>
             <p class="email-header-subject">{{email.subject}}</p>
-            <p>from {{formatContact(email.senderName, email.senderEmail)}}</p>
-            <p>
+            <p class="email-header-from">from {{formatContact(email.senderName, email.senderEmail)}}</p>
+            <p class="email-header-to">
                 <span>to {{formatContact(email.recipientName, email.recipientEmail)}}</span>
                 <span ng-repeat="ccRecipient in email.ccRecipients">, {{formatContact(ccRecipient.name, ccRecipient.email)}}</span>
             </p>
-            <p>sent at {{formatEmailDate(email.date)}}</p>
-            <p ng-if="email.attachments.length > 0">attachments: 
+            <p class="email-header-date">sent at {{formatEmailDate(email.date)}}</p>
+            <p  ng-if="email.attachments.length > 0" class="email-header-attachments">
+                attachments: 
                 <a href ng-repeat="attachment in email.attachments" ng-click="download(attachment)" class="btn-attachment">
                     {{attachment.name}} ({{attachment.size | bytes}})
                 </a>
             </p>
         </md-card-content>
         <md-card-actions>
-            <md-button ng-click="reply()">Reply</md-button>
-            <md-button ng-if="email.ccRecipients.length > 0" ng-click="replyAll()">Reply All</md-button>
-            <md-button ng-click="forward()">Forward</md-button>
-            <md-button ng-click="delete()">Delete</md-button>
+            <div action-buttons>
+                <div class="action-buttons-content">
+                    <md-button ng-click="reply()">Reply</md-button>
+                    <md-button ng-if="email.ccRecipients.length > 0" ng-click="replyAll()">Reply All</md-button>
+                    <md-button ng-click="forward()">Forward</md-button>
+                    <md-button ng-click="delete()">Delete</md-button>
+                </div>
+            </div>
         </md-card-actions>
     </md-card>
     <div ng-show="email" class="email-area">
