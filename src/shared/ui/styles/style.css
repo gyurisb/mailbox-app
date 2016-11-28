@@ -54,21 +54,21 @@ md-content {
     text-overflow: ellipsis;
     display: inline-block;
     max-width: calc(100% - 65px);
+    font-size: 16px !important;
 }
 .email-subject {
     color: black;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 12px;
 }
 .email-date {
     float: right;
 }
-.email-from, .email-date {
-    color: rgba(0,0,0,0.54);
-}
 .md-list-email-content {
     width: 100%;
+    /*margin: 10px 0px;*/
 }
 .md-list-email-content p {
     line-height: initial;
@@ -123,15 +123,12 @@ md-content {
 }
 
 /* Email header style */
-.email-header {
-    margin: 5px 5px 5px 7px;
+.email-header {    
+    margin: 5px 5px 0px 7px;
+    z-index: 1;
 }
 .email-header p {
     margin: 7px 0px 0px 0px;
-    font-size: 15px;
-}
-.email-header p.email-header-subject {
-    font-size: 20px;
 }
 .btn-attachment {
     color: black;

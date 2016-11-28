@@ -3,7 +3,6 @@ function Mailbox(LockObject, SQLiteSubsystem, FileSubsystem, EmailConnection, Fe
     var lock = new LockObject();
     var fs = new FileSubsystem();
     var store = new EmailStore(SQLiteSubsystem, AccountsTable, ContactsTable, EmailsTable, FoldersTable, QueueTable);
-    var fetchProcess;
     var events = {
         folderUpdate: function(){},
         mailboxUpdate: function(){},
@@ -11,10 +10,10 @@ function Mailbox(LockObject, SQLiteSubsystem, FileSubsystem, EmailConnection, Fe
         downloadFinish: function(){},
         loginFinish: function(){}
     }
+    var fetchProcess = new FetchProcess(store, fs, events, lock, EmailConnection, ServerCommands);
 
     mailbox = {
         login: function(credentials, success, error) {
-            fetchProcess = new FetchProcess(store, fs, events, lock, EmailConnection, ServerCommands);
             fetchProcess.setLoginTask(new fetchProcess.LoginTask(credentials, true));
             fetchProcess.start();
             success();
@@ -28,7 +27,6 @@ function Mailbox(LockObject, SQLiteSubsystem, FileSubsystem, EmailConnection, Fe
                             events.accountUpdate({ type: "account" });
                         } else {
                             events.accountUpdate({ type: "account", email: accounts[0].username });
-                            fetchProcess = new FetchProcess(store, fs, events, lock, EmailConnection, ServerCommands);
                             fetchProcess.setLoginTask(new fetchProcess.LoginTask(accounts[0]));
                             fetchProcess.start();
                         }

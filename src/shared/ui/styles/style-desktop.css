@@ -34,6 +34,12 @@ reader {
     display: flex;
     flex-direction: column;
 }
+.email-header p {
+    font-size: 15px;
+}
+.email-header p.email-header-subject {
+    font-size: 20px;
+}
 .email-area {
     flex: 1;
     position: relative;

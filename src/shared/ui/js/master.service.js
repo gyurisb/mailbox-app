@@ -4,13 +4,13 @@ ngApp.factory('$master', ['$rootScope', '$location', '$window',
         var pages = undefined;
         var container = undefined;
         var loadedNum = 0;
-        var scope = null;
         var index;
+        var focusChangedCallback;
         
         $rootScope.$on('$locationChangeStart', function(){
             index = Number(($location.path() || "/0").substr(1));
-            if (scope != null) {
-                scope.path = index;
+            if (focusChangedCallback != null) {
+                focusChangedCallback(index);
             }
         });
         
@@ -22,12 +22,12 @@ ngApp.factory('$master', ['$rootScope', '$location', '$window',
                 if (platform == 'desktop') {
                     return true;
                 } else {
-                    return scope && scope.path == pageIndex;
+                    return index == pageIndex;
                 }
             },
-            setScope: function(currentScope) {
-                scope = currentScope;
-                scope.path = index;
+            onFocusChanged: function(callback) {
+                focusChangedCallback = callback;
+                focusChangedCallback(index);
             }
         };
     }

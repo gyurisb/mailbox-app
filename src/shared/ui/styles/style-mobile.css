@@ -157,13 +157,15 @@ md-contact-chips md-icon {
     height: 60px;
     margin: 0px 2px 2px 2px;
 }
-.email-header-subject, .email-header-to, .email-header-date, .email-header-attachments {
+.email-header-from, .email-header-to, .email-header-date, .email-header-attachments {
     display: none;
 }
-.email-header p {
+.email-header-subject {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+    font-size: 18px;
+    margin-top: 5px !important;
 }
 .email-area {
     height: calc(100% - 65px);

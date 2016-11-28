@@ -1,11 +1,14 @@
 ngApp.controller('MainController', ['$scope', '$app', '$master', '$mailbox', function($scope, $app, $master, $mailbox) {
     
     mainScope = $scope;
-    $master.setScope($scope);
     $scope.titles = {};
     $scope.loggedIn = false;
     $scope.folderInProgress = {};
 
+    $master.onFocusChanged(function(path) {
+        $scope.path = path;
+    });
+    
     $mailbox.onAccountUpdate(function(evt){
         if (evt.type == "account") {
             if (evt.email) {

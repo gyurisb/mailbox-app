@@ -244,17 +244,29 @@ function FetchProcess(store, fs, events, lock, EmailConnection, ServerCommands) 
         return {
             preparing: function(success, error) {
                 store.folders.get(folderId, function(folder) {
-                    store.folders.getOldestDate(folder.id, function(oldestDate){
-                         base = new AllEmailsSynchronizationTask(folder, 21, oldestDate, -1);
-                         success();
-                    });
+                    if (folder) {
+                        store.folders.getOldestDate(folder.id, function(oldestDate){
+                            base = new AllEmailsSynchronizationTask(folder, 21, oldestDate, -1);
+                            success();
+                        });
+                    } else {
+                        success();
+                    }
                 });
             },
             operation: function(args, success, error) {
-                base.operation(args, success, error);
+                if (base) {
+                    base.operation(args, success, error);
+                } else {
+                    success();
+                }
             },
             processing: function(args, success, error) {
-                base.processing(args, success, error);
+                if (base) {
+                    base.processing(args, success, error);
+                } else {
+                    success();
+                }
             },
             status: { phase: "emails", progress: -1 }
         }

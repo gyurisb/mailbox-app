@@ -3,7 +3,7 @@
         <md-list-item ng-repeat="email in emails" ng-click="emailClicked(email)" ng-drag="{ email: email }" ng-class="{'md-selected': email.id==selected, 'md-unseen': !email.seen}">
             <div class="md-list-email-content">
                 <p>
-                    <i class="email-from">{{email.senderName || email.senderEmail}}</i>
+                    <span class="email-from">{{email.senderName || email.senderEmail}}</span>
                     <span class="email-date">{{formatEmailDate(email.date)}}</span>
                 </p>
                 <p class="email-subject">{{email.subject}}</p>

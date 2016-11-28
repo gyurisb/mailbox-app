@@ -5,7 +5,7 @@ ngApp.controller('ReaderController', ['$scope', '$mailbox', '$app', '$master', '
     $app.onEmailFocus(function(email) {
         if (platform == "mobile" || email != $scope.email) {
             $mailbox.getEmailBody(email.id).success(function(body){
-                $scope.titles[2] = email.subject;
+                $scope.titles[2] = email.senderName || email.senderEmail;
                 $master.focus(2);
                 if (email.contentType == "text/plain") {
                     body = body.replace(/\n/g, '<br/>');
