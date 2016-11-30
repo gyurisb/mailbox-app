@@ -19,7 +19,7 @@ function EmailConnectionProxy() {
     return proxy;
 
     function request(method, action, data, saveToken, success, error) {
-        $.ajax("http://" + serverUrl + '/' + action, {
+        $.ajax(serverUrl + '/' + action, {
            method: method,
            headers: {
                 'Content-Type': 'application/json',
