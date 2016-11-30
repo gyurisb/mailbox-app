@@ -131,7 +131,13 @@ gulp.task('make_electron_package', ['build'], function(done){
         dir: 'dist/desktop',
         out: 'dist/bin/portable',
         platform: 'win32',
-        arch: 'x64'
+        arch: 'x64',
+        icon: "dist/desktop/appicon.ico",
+        win32metadata: {
+            CompanyName: "Gyuris Bence",
+            ProductName: "Mailbox Explorer",
+            FileDescription: "Mailbox application"
+        }
     }, function(err, appPaths){
         if (err) done(err);
         else done();
@@ -150,6 +156,7 @@ gulp.task('bundle_windows', ['bundle_electron_package'], function(done){
 		outputDirectory: 'dist/bin/win32-x64',
 		authors: 'Gyuris Bence',
 		noMsi: true,
+        iconUrl: "https://raw.githubusercontent.com/gyurisb/mailbox-app/master/src/desktop/appicon.ico",
         setupIcon: "dist/desktop/appicon.ico"
 	}).then(() => done(), (e) => done(e));
 });

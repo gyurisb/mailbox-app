@@ -3,6 +3,7 @@
     <name>MailboxExplorer</name>
     <description>Email client application</description>
     <author email="gyuris.bence@hotmail.com" href="https://github.com/gyurisb">Gyuris Bence</author>
+	<icon src="appicon.png" />
     <content src="index.html" />
     <access origin="*" />
     <allow-navigation href="*" />
