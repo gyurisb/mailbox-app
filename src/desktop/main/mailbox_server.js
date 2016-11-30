@@ -20,14 +20,14 @@ global.mailboxActions = Object.keys(mailbox);
 
 Object.keys(mailbox).forEach(function(action){
     if (action.startsWith("on")) {
-        var listeners = [];
+        var listener;
         ipcMain.on(action, function(event){
-            listeners.push(event.sender);
+            listener = event.sender;
         });
         mailbox[action](function(eventArgs) {
-            listeners.forEach(function(listener){
+            if (listener) {
                 listener.send(action + 'Triggered', eventArgs);
-            });
+            }
         });
     } else {
         ipcMain.on(action + 'Async', function(event, request){

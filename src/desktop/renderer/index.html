@@ -16,8 +16,8 @@
         require('angular-material');
         require('angular-ui-tinymce');
         const ipcRenderer = require('electron').ipcRenderer;
-        const remote = require('remote');
-        const dialog = remote.require('dialog');
+        const remote = require('electron').remote;
+        const dialog = remote.dialog;
         const path = require('path');
         const fs = require('fs');
     </script>

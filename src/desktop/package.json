@@ -19,13 +19,12 @@
     "appId": "gyurisb.mailbox",
     "mac": {
       "category": "gyurisb.mailbox.app"
-    },
-    "win": {}
+    }
   },
   "homepage": "https://github.com/gyurisb/mailbox-app",
   "dependencies": {
     "browserbox": "0.9.1",
-    "electron-prebuilt": "^0.36.0",
+    "electron-prebuilt": "1.4.10",
     "electron-squirrel-startup": "^1.0.0",
     "emailjs-mime-builder": "1.0.1",
     "emailjs-mime-parser": "1.0.0",

@@ -4,7 +4,7 @@ ngApp.factory('$app', ['$master', '$rootScope',
         var emailFocusedCallbacks = [];
         var restoredCallbacks = [];
         var emailModifiedCallbacks = [];
-        var emailParametersCallbacks = [];
+        var newEmailFocusedCallbacks = [];
         
         return {
             onRestore: function(callback) {
@@ -19,11 +19,11 @@ ngApp.factory('$app', ['$master', '$rootScope',
             onEmailModify: function(callback) {
                 emailModifiedCallbacks.push(callback);
             },
-            onEmailParameters: function(callback) {
+            onNewEmailFocus: function(callback) {
                 if (platform == 'desktop') {
                     callback(JSON.parse(remote.getGlobal('newEmailParams')));
                 } else {
-                    emailParametersCallbacks.push(callback);
+                    newEmailFocusedCallbacks.push(callback);
                 }
             },
             restore: function() {
@@ -55,7 +55,7 @@ ngApp.factory('$app', ['$master', '$rootScope',
                 if (platform == 'desktop') {
                     ipcRenderer.send('openNewEmailWindow', params || {});
                 } else if (platform == 'mobile') {
-                    emailParametersCallbacks.forEach(function(callback){
+                    newEmailFocusedCallbacks.forEach(function(callback){
                         callback(params || {});
                     });
                     $master.focus(4);

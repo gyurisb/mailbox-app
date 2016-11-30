@@ -18,10 +18,10 @@ ngApp.controller('NewController', ['$scope', '$mailbox', '$master', '$q', '$time
         menubar: false,
         statusbar: false,
         toolbar: 'insertfile undo redo | styleselect | fontselect fontsizeselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
-        content_css: 'styles/style-email.css'
+        content_css: 'styles/style-new.css'
     };
 
-    $app.onEmailParameters(function(params){
+    $app.onNewEmailFocus(function(params){
         $scope.to = [];
         $scope.toBcc = [];
         $scope.subject = "";

@@ -1,5 +1,8 @@
 'use strict';
 
+//Squirrel installer configurations
+if (require('electron-squirrel-startup')) return;
+
 require('./main/mailbox_server.js')
 const electron = require('electron');
 const open = require("open");
@@ -9,19 +12,19 @@ const ipcMain = electron.ipcMain;
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow;
 // Module to create menus
-const Menu = require('menu');
-const MenuItem = require('menu-item');
+const Menu = require('electron').Menu;
+const MenuItem = require('electron').MenuItem;
 
-//Squirrel installer configurations
-if (require('electron-squirrel-startup')) return;
+app.commandLine.appendSwitch('disable-smooth-scrolling');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
+let subWindows = [];
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 1200, height: 700});
+  mainWindow = new BrowserWindow({width: 1200, height: 700, icon: __dirname + '/appicon.ico'});
   createDebugMenu(mainWindow);
 
   // and load the index.html of the app.
@@ -33,6 +36,9 @@ function createWindow () {
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
     mainWindow = null;
+    subWindows.forEach(function(window){
+      window.close();
+    });
   });
 }
 
@@ -59,21 +65,20 @@ app.on('activate', function () {
 
 ipcMain.on('openNewEmailWindow', function(event, params) {
   global.newEmailParams = JSON.stringify(params);
-  var newWindow = new BrowserWindow({width: 1024, height: 768});
+  var newWindow = new BrowserWindow({width: 1024, height: 768, icon: __dirname + '/appicon.ico'});
+  subWindows.push(newWindow);
+  newWindow.on('closed', function() {
+    subWindows.splice(subWindows.indexOf(newWindow), 1);
+  });
   createDebugMenu(newWindow);
   newWindow.loadURL('file://' + __dirname + '/renderer/new.html');
-  newWindow.on('closed', function() {});
 });
 
 
 ipcMain.on('openNewLoginDialog', function(event, arg) {
-  var newWindow = new BrowserWindow({width: 400, height: 545});
+  var newWindow = new BrowserWindow({width: 400, height: 545, parent: mainWindow, modal: true, resizable: false, icon: __dirname + '/appicon.ico'});
   createDebugMenu(newWindow);
   newWindow.loadURL('file://' + __dirname + '/renderer/login.html');
-  newWindow.on('closed', function() {});
-});
-
-ipcMain.on('closeWindow', function(event, arg) {
 });
 
 ipcMain.on('openLink', function(event, href) {

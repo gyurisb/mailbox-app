@@ -17,7 +17,7 @@ ngApp.controller('MainController', ['$scope', '$app', '$master', '$mailbox', fun
                 $app.restore();
             } else {
                 setPhase("noaccount");
-                $app.requestLogin();
+                $scope.newAccount();
             }
         } else if (evt.type == "progress") {
             setPhase(evt.phase);
@@ -41,6 +41,10 @@ ngApp.controller('MainController', ['$scope', '$app', '$master', '$mailbox', fun
 
     $scope.back = function() {
         window.history.back();
+    }
+    
+    $scope.newAccount = function() {
+        $app.requestLogin();
     }
 
     function setPhase(phase) {

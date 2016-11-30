@@ -84,12 +84,12 @@ gulp.task('rebuild_packages_desktop_sqlite3_exec', ['install_packages_desktop'],
         .pipe(discardIfExists('dist/desktop/node_modules/sqlite3/build/release/node_sqlite3.node'))
         .pipe(shell('npm run prepublish', { cwd: '<%= file.path %>' }))
         .pipe(shell('node-gyp configure --module_name=node_sqlite3 --module_path=../lib/binding/node-v46-win32-x64', { cwd: '<%= file.path %>' }))
-        .pipe(shell('node-gyp rebuild --target=0.36.1 --arch=x64 --target_platform=win32 --dist-url=https://atom.io/download/atom-shell --module_name=node_sqlite3 --module_path=../lib/binding/node-v46-win32-x64', { cwd: '<%= file.path %>' }))
+        .pipe(shell('node-gyp rebuild --target=1.4.10 --arch=x64 --target_platform=win32 --dist-url=https://atom.io/download/atom-shell --module_name=node_sqlite3 --module_path=../lib/binding/node-v46-win32-x64', { cwd: '<%= file.path %>' }))
 })
 gulp.task('rebuild_packages_desktop_sqlite3', ['rebuild_packages_desktop_sqlite3_exec'], function() {
     return gulp.src('dist/desktop/node_modules/sqlite3/build/release/node_sqlite3.node')
-        .pipe(discardIfExists('dist/desktop/node_modules/sqlite3/lib/binding/electron-v0.36-win32-x64'))
-        .pipe(gulp.dest('dist/desktop/node_modules/sqlite3/lib/binding/electron-v0.36-win32-x64'));
+        .pipe(discardIfExists('dist/desktop/node_modules/sqlite3/lib/binding/electron-v1.4-win32-x64'))
+        .pipe(gulp.dest('dist/desktop/node_modules/sqlite3/lib/binding/electron-v1.4-win32-x64'));
 })
 gulp.task('rebuild_packages_desktop', ['rebuild_packages_desktop_sqlite3']);
 
@@ -126,7 +126,7 @@ gulp.task('prepare_cordova', ['build_source_mobile'], function(){
 
 gulp.task('build', ['build_source', 'prepare_cordova', 'install_packages', 'rebuild_packages_desktop', 'flatten_packages_desktop', 'minimize_packages_mobile_ui']);
 
-gulp.task('bundle_electron_package', ['build'], function(done){
+gulp.task('make_electron_package', ['build'], function(done){
     electronPackager({
         dir: 'dist/desktop',
         out: 'dist/bin/portable',
@@ -138,19 +138,26 @@ gulp.task('bundle_electron_package', ['build'], function(done){
     })
 });
 
+gulp.task('minimize_electron_package', ['make_electron_package'], function(){
+    return del(['dist/bin/portable/MailboxExplorer-win32-x64/resources/app/mailbox.db'])
+});
+
+gulp.task('bundle_electron_package', ['make_electron_package', 'minimize_electron_package']);
+
 gulp.task('bundle_windows', ['bundle_electron_package'], function(done){
 	electronInstaller.createWindowsInstaller({
 		appDirectory: 'dist/bin/portable/MailboxExplorer-win32-x64',
 		outputDirectory: 'dist/bin/win32-x64',
 		authors: 'Gyuris Bence',
-		noMsi: true
+		noMsi: true,
+        setupIcon: "dist/desktop/appicon.ico"
 	}).then(() => done(), (e) => done(e));
 });
 
 gulp.task('cordova_build_wp8', ['build'], function(){
     return gulp.src('dist/mobile/cordova')
         .pipe(shell('cordova build wp8 --release', { cwd: '<%= file.path %>' }))
-})
+});
 
 gulp.task('bundle_wp8', ['cordova_build_wp8'], function(){
     return gulp.src('dist/mobile/cordova/platforms/wp8/Bin/Release/CordovaAppProj_Release_AnyCPU.xap')
@@ -160,7 +167,7 @@ gulp.task('bundle_wp8', ['cordova_build_wp8'], function(){
 gulp.task('cordova_build_android', ['build'], function(){
     return gulp.src('dist/mobile/cordova')
         .pipe(shell('cordova build android --release', { cwd: '<%= file.path %>' }))
-})
+});
 
 gulp.task('bundle_android', ['cordova_build_android'], function(){
     return gulp.src('dist/mobile/cordova/platforms/android/build/outputs/apk/android-release-unsigned.apk')

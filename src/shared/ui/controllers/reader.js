@@ -12,14 +12,16 @@ ngApp.controller('ReaderController', ['$scope', '$mailbox', '$app', '$master', '
                 }
                 $scope.email = email;
                 $scope.email.body = body;
-                $('#email-frame').contents().find('html').html(body);
+                $('#email-frame').contents().find('html').html('<head></head><body></body>');
+                $('#email-frame').contents().find('body').html(body);
+                $('#email-frame').contents().find('head').append('<link rel="stylesheet" href="styles/style-reader.css">');
                 $('#email-frame').contents().find('a').each(function(i, elBase){
                     var el = $(elBase);
-                    el.attr('fake-href', el.attr('href'));
+                    var href = el.attr('href');
                     el.attr('href', 'javascript:void(0)');
                     el.click(function(evt){
                         evt.stopPropagation();
-                        $app.openLink(el.attr('fake-href'));
+                        $app.openLink(href);
                     });
                 });
             });

@@ -1,5 +1,9 @@
 <div ng-controller="FoldersController" class="folders">
-    <div ng-drop="dropFolderOnRoot($data)">
+    <md-button ng-if="!emailAddress" ng-click="newAccount()" class="folder-menu-btn action-btn">
+        <span>New account</span>
+        <md-icon>&#xf055;</md-icon>
+    </md-button>
+    <div ng-if="emailAddress" ng-drop="dropFolderOnRoot($data)">
         <div context-menu="accountMenu" class="account-label">
             {{emailAddress}}
         </div>
@@ -13,7 +17,7 @@
             </folder>
         </div>
     </div>
-    <md-button ng-click="newEmail()" class="new-email-btn action-btn">
+    <md-button ng-if="emailAddress" ng-click="newEmail()" class="folder-menu-btn new-email-btn action-btn">
         <span>New email</span>
         <md-icon>&#xf055;</md-icon>
     </md-button>
