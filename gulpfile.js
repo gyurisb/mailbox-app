@@ -16,7 +16,6 @@ var EmailConnection = require('./src/shared/email/email_conn.js');
 
 gulp.task('clean_source', function() {
     return del(['dist/**'].concat(delExcept([
-        'dist/bin/**',
         'dist/desktop/node_modules/**',
         'dist/desktop/renderer/node_modules/**', 
         'dist/mobile/cordova/plugins/**', 
@@ -129,7 +128,7 @@ gulp.task('build', ['build_source', 'prepare_cordova', 'install_packages', 'rebu
 gulp.task('make_electron_package', ['build'], function(done){
     electronPackager({
         dir: 'dist/desktop',
-        out: 'dist/bin/portable',
+        out: 'bin/portable',
         platform: 'win32',
         arch: 'x64',
         icon: "dist/desktop/appicon.ico",
@@ -145,15 +144,15 @@ gulp.task('make_electron_package', ['build'], function(done){
 });
 
 gulp.task('minimize_electron_package', ['make_electron_package'], function(){
-    return del(['dist/bin/portable/MailboxExplorer-win32-x64/resources/app/mailbox.db'])
+    return del(['bin/portable/MailboxExplorer-win32-x64/resources/app/mailbox.db'])
 });
 
 gulp.task('bundle_electron_package', ['make_electron_package', 'minimize_electron_package']);
 
 gulp.task('bundle_windows', ['bundle_electron_package'], function(done){
 	electronInstaller.createWindowsInstaller({
-		appDirectory: 'dist/bin/portable/MailboxExplorer-win32-x64',
-		outputDirectory: 'dist/bin/win32-x64',
+		appDirectory: 'bin/portable/MailboxExplorer-win32-x64',
+		outputDirectory: 'bin/win32-x64',
 		authors: 'Gyuris Bence',
 		noMsi: true,
         iconUrl: "https://raw.githubusercontent.com/gyurisb/mailbox-app/master/src/desktop/appicon.ico",
@@ -168,7 +167,7 @@ gulp.task('cordova_build_wp8', ['build'], function(){
 
 gulp.task('bundle_wp8', ['cordova_build_wp8'], function(){
     return gulp.src('dist/mobile/cordova/platforms/wp8/Bin/Release/CordovaAppProj_Release_AnyCPU.xap')
-        .pipe(gulp.dest('dist/bin/wp8'))
+        .pipe(gulp.dest('bin/wp8'))
 });
 
 gulp.task('cordova_build_android', ['build'], function(){
@@ -178,7 +177,7 @@ gulp.task('cordova_build_android', ['build'], function(){
 
 gulp.task('bundle_android', ['cordova_build_android'], function(){
     return gulp.src('dist/mobile/cordova/platforms/android/build/outputs/apk/android-release-unsigned.apk')
-        .pipe(gulp.dest('dist/bin/android'))
+        .pipe(gulp.dest('bin/android'))
 });
 
 gulp.task('bundle', ['bundle_windows', 'bundle_wp8', 'bundle_android']);
