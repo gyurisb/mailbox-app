@@ -172,11 +172,11 @@ gulp.task('bundle_wp8', ['cordova_build_wp8'], function(){
 
 gulp.task('cordova_build_android', ['build'], function(){
     return gulp.src('dist/mobile/cordova')
-        .pipe(shell('cordova build android --release', { cwd: '<%= file.path %>' }))
+        .pipe(shell('cordova build android', { cwd: '<%= file.path %>' }))
 });
 
 gulp.task('bundle_android', ['cordova_build_android'], function(){
-    return gulp.src('dist/mobile/cordova/platforms/android/build/outputs/apk/android-release-unsigned.apk')
+    return gulp.src('dist/mobile/cordova/platforms/android/build/outputs/apk/android-debug.apk')
         .pipe(gulp.dest('bin/android'))
 });
 
